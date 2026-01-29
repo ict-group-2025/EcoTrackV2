@@ -10,9 +10,23 @@ import '../widgets/forecast_section.dart';
 import '../widgets/pollutants_section.dart';
 import '../widgets/news_section.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+   @override
+  void initState() {
+    super.initState();
+    // Request location once after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appState = Provider.of<AppState>(context, listen: false);
+      appState.fetchLocation();
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
@@ -25,7 +39,7 @@ class DashboardScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(),
+                _buildHeader(appState),
                 const SizedBox(height: 24),
                 WeatherCard(weather: appState.getWeatherData()),
                 const SizedBox(height: 16),
@@ -49,7 +63,8 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader( AppState appState) {
+     final locationText = appState.currentLocationString == 'Unknown location' ? 'San Francisco' : appState.currentLocationString;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -71,8 +86,8 @@ class DashboardScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            const Text(
-              'San Francisco',
+             Text(
+              locationText ,
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
           ],
