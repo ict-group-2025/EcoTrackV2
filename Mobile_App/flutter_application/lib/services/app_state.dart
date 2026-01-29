@@ -1,5 +1,5 @@
-
 import 'package:flutter/foundation.dart';
+import 'package:geolocator/geolocator.dart';
 import '../models/data_models.dart';
 
 class AppState extends ChangeNotifier {
@@ -192,4 +192,5 @@ class AppState extends ChangeNotifier {
       ),
     ];
   }
+ 
 }
