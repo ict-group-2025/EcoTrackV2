@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:flutter_application/models/geo_model.dart';
 import 'package:flutter_application/models/osm_address.dart';
 import 'package:http/http.dart' as http;
