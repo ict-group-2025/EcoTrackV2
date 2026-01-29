@@ -192,47 +192,5 @@ class AppState extends ChangeNotifier {
       ),
     ];
   }
-
-  String? _currentLocationString;
-
-  String get currentLocationString =>
-      _currentLocationString ?? 'Unknown location';
-
-  /// Fetch the device's current GPS position and store a simple lat,lon string.
-  Future<void> fetchLocation() async {
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _currentLocationString = 'Location services disabled';
-        notifyListeners();
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          _currentLocationString = 'Permission denied';
-          notifyListeners();
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        _currentLocationString = 'Permission denied permanently';
-        notifyListeners();
-        return;
-      }
-
-      final pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-      _currentLocationString =
-          '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}';
-      notifyListeners();
-    } catch (e) {
-      _currentLocationString = 'Location error';
-      notifyListeners();
-    }
-  }
+ 
 }

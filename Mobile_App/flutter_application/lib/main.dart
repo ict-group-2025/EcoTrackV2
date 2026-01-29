@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/controller/location_controller.dart';
+import 'package:flutter_application/controller/osm_controller.dart';
+import 'package:flutter_application/views/location_view_model.dart';
 import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'services/app_state.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => AppState(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AppState()),
+
+        ChangeNotifierProvider(
+          create: (_) => LocationViewModel(
+            locationController: LocationController(),
+            osmController: OsmController(),
+          ),
+        ),
+      ],
       child: const MyApp(),
     ),
   );

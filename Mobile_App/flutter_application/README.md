@@ -17,5 +17,6 @@ samples, guidance on mobile development, and a full API reference.
 
 Content: 
 - Gps(search ,room communication)
++ Get location -> OpenStreetMap -> Call API
 - Api (weather, aqi)
 - Icon weather
