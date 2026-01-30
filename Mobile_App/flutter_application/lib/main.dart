@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/controller/location_controller.dart';
 import 'package:flutter_application/controller/osm_controller.dart';
+import 'package:flutter_application/controller/osm_search_controller.dart';
 import 'package:flutter_application/views/location_view_model.dart';
+import 'package:flutter_application/views/search_view_model.dart';
 import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'services/app_state.dart';
@@ -11,12 +13,14 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AppState()),
-
         ChangeNotifierProvider(
           create: (_) => LocationViewModel(
             locationController: LocationController(),
             osmController: OsmController(),
           ),
+        ),
+          ChangeNotifierProvider(
+          create: (_) => SearchViewModel(controller: OsmSearchController()),
         ),
       ],
       child: const MyApp(),

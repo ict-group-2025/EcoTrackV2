@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'dashboard_screen.dart';
+import 'dashboard/dashboard_screen.dart';
 import 'community_screen.dart';
 import 'analysis_screen.dart';
 import 'control_center_screen.dart';
