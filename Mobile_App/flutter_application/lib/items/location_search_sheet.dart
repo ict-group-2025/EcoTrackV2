@@ -39,11 +39,9 @@ class LocationSearchSheet extends StatelessWidget {
             title: 'Current Location',
             subtitle: 'Using GPS',
             onTap: () async{
-              // Handle current location 
-              Navigator.pop(context);
+               Navigator.pop(context);
               final vm = context.read<LocationViewModel>();
-              await vm.loadLocation();
-             
+              await vm.useCurrentLocation();
             },
           ),
 
@@ -86,7 +84,7 @@ class LocationSearchSheet extends StatelessWidget {
                 'Cancel',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[600],
+                  color: Colors.red[400],
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -109,54 +107,59 @@ class LocationSearchSheet extends StatelessWidget {
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
+    return Material(
+         color: Colors.grey[50],
       borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[200]!, width: 1),
-        ),
-        child: Row(
-          children: [
-            // Icon
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        splashColor: Colors.blue.withValues(alpha: 0.2),
+        highlightColor: Colors.blue.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[200]!, width: 1),
+          ),
+          child: Row(
+            children: [
+              // Icon
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: iconColor, size: 24),
               ),
-              child: Icon(icon, color: iconColor, size: 24),
-            ),
-            const SizedBox(width: 16),
-
-            // Text
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+              const SizedBox(width: 16),
+      
+              // Text
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
               ),
-            ),
-
-            // Arrow icon
-            Icon(Icons.chevron_right, color: Colors.grey[400], size: 24),
-          ],
+      
+              // Arrow icon
+              Icon(Icons.chevron_right, color: Colors.grey[400], size: 24),
+            ],
+          ),
         ),
       ),
     );
