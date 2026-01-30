@@ -12,24 +12,60 @@ class LocationViewModel extends ChangeNotifier {
   OsmAddress? address;
   bool isLoading = false;
   String? error;
+  bool  _isManual = false;
+  String? _manualDisplayLocation;
+  String? _lastDisplayLocation;
+
+
+
 
   LocationViewModel({
     required this.locationController,
     required this.osmController,
   });
 
-  Future<void> loadLocation() async {
+bool get isManualLocation => _isManual;
+
+
+
+Future<void> useCurrentLocation() async {
+    _isManual = false;
+    _manualDisplayLocation = null;
+
+    await loadLocation();
+  }
+
+Future<void> loadLocation() async {
+    if (isLoading) return;
     try {
       isLoading = true;
       error = null;
       notifyListeners();
-
-      coordinate = await locationController.fetchLocation();
-      address = await osmController.reverseGeocode(coordinate!);
-
-      if (address == null) {
-        error = 'Không lấy được địa chỉ';
+      final newCoordinate = await locationController.fetchLocation();
+      final newAddress = await osmController.reverseGeocode(newCoordinate);
+      if (newAddress == null) {
+        error = 'Cannot get address';
+        return;
       }
+
+      final parts = <String>[];
+
+      if (newAddress.district != null) {
+        parts.add(_normalizeVietnameseLocation(newAddress.district!));
+      }
+      if (newAddress.city != null) {
+        parts.add(_normalizeVietnameseLocation(newAddress.city!));
+      }
+
+      final newDisplayLocation = parts.join(', ');
+
+      if (newDisplayLocation == _lastDisplayLocation) {
+        return;
+      }
+
+      coordinate = newCoordinate;
+      address = newAddress;
+      _lastDisplayLocation = newDisplayLocation;
     } catch (e) {
       error = e.toString();
     } finally {
@@ -37,6 +73,7 @@ class LocationViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
 
 String _normalizeVietnameseLocation(String value) {
     return value
@@ -49,7 +86,11 @@ String _normalizeVietnameseLocation(String value) {
         .trim();
   }
 
-  String get displayLocation {
+    String get displayLocation {
+    if (_isManual && _manualDisplayLocation != null) {
+      return _manualDisplayLocation!;
+    }
+
     if (address == null) return 'Unknown location';
 
     final parts = <String>[];
@@ -63,6 +104,21 @@ String _normalizeVietnameseLocation(String value) {
 
     return parts.join(', ');
   }
+void setManualLocation({
+    required double lat,
+    required double lon,
+    required String displayName,
+  }) {
+    if (_manualDisplayLocation == displayName) return;
+
+    _isManual = true;
+    coordinate = GeoModel(latitude: lat, longitude: lon);
+    _manualDisplayLocation = displayName;
+
+    notifyListeners();
+  }
+
+
 
 
 }

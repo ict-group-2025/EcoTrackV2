@@ -45,7 +45,7 @@ class AnalysisScreen extends StatelessWidget {
           children: [
             const Text(
               'Detailed AQI Analysis',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
           ],
         ),
