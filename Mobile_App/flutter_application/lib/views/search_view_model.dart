@@ -11,27 +11,23 @@ class SearchViewModel extends ChangeNotifier {
   List<OsmSearch> results = [];
   bool isLoading = false;
   String query = '';
-
   Timer? _debounce;
 
 
  void onQueryChanged(String value) {
     query = value;
-
     _debounce?.cancel();
-
     if (query.trim().isEmpty) {
       results = [];
       notifyListeners();
       return;
     }
-
     _debounce = Timer(const Duration(milliseconds: 400), _search);
   }
 
 
  Future<void> _search() async {
-    if (query.trim().length < 2) {
+    if (query.trim().length < 1) {
       results = [];
       notifyListeners();
       return;
@@ -98,7 +94,6 @@ String _normalizeVietnamese(String value) {
         )
         .replaceAll(RegExp(r'^(Thành phố|TP\.?)\s+', caseSensitive: false), '')
         .replaceAll(RegExp(r'^Tỉnh\s+', caseSensitive: false), '')
-        // 🔥 normalize khoảng trắng
         .replaceAll(RegExp(r'\s*,\s*'), ', ')
         .replaceAll(RegExp(r'\s{2,}'), ' ')
         .trim();

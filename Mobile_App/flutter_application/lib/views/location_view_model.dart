@@ -3,6 +3,7 @@ import 'package:flutter_application/controller/location_controller.dart';
 import 'package:flutter_application/controller/osm_controller.dart';
 import 'package:flutter_application/models/geo_model.dart';
 import 'package:flutter_application/models/osm_address.dart';
+import 'package:flutter_application/models/recent_location.dart';
 
 class LocationViewModel extends ChangeNotifier {
   final LocationController locationController;
@@ -12,30 +13,33 @@ class LocationViewModel extends ChangeNotifier {
   OsmAddress? address;
   bool isLoading = false;
   String? error;
-  bool  _isManual = false;
+  bool _isManual = false;
   String? _manualDisplayLocation;
   String? _lastDisplayLocation;
+  bool get isManualLocation => _isManual;
+  final List<RecentLocation> _recentLocations = [];
 
-
-
-
+    //contructor
   LocationViewModel({
     required this.locationController,
     required this.osmController,
   });
 
-bool get isManualLocation => _isManual;
+  //recent location
+  List<RecentLocation> get recentLocations =>
+      List.unmodifiable(_recentLocations);
 
 
-
-Future<void> useCurrentLocation() async {
+//gps current
+  Future<void> useCurrentLocation() async {
     _isManual = false;
     _manualDisplayLocation = null;
 
     await loadLocation();
   }
 
-Future<void> loadLocation() async {
+//load search location
+  Future<void> loadLocation() async {
     if (isLoading) return;
     try {
       isLoading = true;
@@ -74,8 +78,7 @@ Future<void> loadLocation() async {
     }
   }
 
-
-String _normalizeVietnameseLocation(String value) {
+  String _normalizeVietnameseLocation(String value) {
     return value
         .replaceAll(RegExp(r'^Phường\s+', caseSensitive: false), '')
         .replaceAll(RegExp(r'^Xã\s+', caseSensitive: false), '')
@@ -86,7 +89,7 @@ String _normalizeVietnameseLocation(String value) {
         .trim();
   }
 
-    String get displayLocation {
+  String get displayLocation {
     if (_isManual && _manualDisplayLocation != null) {
       return _manualDisplayLocation!;
     }
@@ -104,7 +107,8 @@ String _normalizeVietnameseLocation(String value) {
 
     return parts.join(', ');
   }
-void setManualLocation({
+
+  void setManualLocation({
     required double lat,
     required double lon,
     required String displayName,
@@ -117,8 +121,19 @@ void setManualLocation({
 
     notifyListeners();
   }
-
-
-
+  // add recent list
+  void addRecentLocation(RecentLocation location) {
+    _recentLocations.removeWhere((e) => e.displayName == location.displayName);
+    _recentLocations.insert(0, location);
+    if (_recentLocations.length > 10) {
+      _recentLocations.removeLast();
+    }
+    notifyListeners();
+  }
+  //clear list
+void clearRecentLocations() {
+    _recentLocations.clear();
+    notifyListeners();
+  }
 
 }

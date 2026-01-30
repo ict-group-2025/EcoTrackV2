@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_application/models/osm_search.dart';
 import 'package:http/http.dart' as http;
 
@@ -22,8 +22,8 @@ class OsmSearchController {
      if (response.statusCode != 200) {
       return [];
     }
-    debugPrint('📦 [OSM SEARCH] Status: ${response.statusCode}');
-    debugPrint('📦 [OSM SEARCH] Raw body: ${response.body}');
+    log('📦 [OSM SEARCH] Status: ${response.statusCode}');
+    log('📦 [OSM SEARCH] Raw body: ${response.body}');
 
     final List data = jsonDecode(response.body);
 

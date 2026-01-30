@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/models/recent_location.dart';
 import 'package:flutter_application/views/location_view_model.dart';
 import 'package:flutter_application/views/search_view_model.dart';
 import 'package:provider/provider.dart';
@@ -45,6 +46,9 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final locationVM = context.watch<LocationViewModel>();
+    final recent = locationVM.recentLocations;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
@@ -72,13 +76,24 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                                 title: vm.formatLocation(r),
                                 subtitle: r.address['country'] ?? '',
                                 onTap: () {
-                                  context
-                                      .read<LocationViewModel>()
-                                      .setManualLocation(
-                                        lat: r.lat,
-                                        lon: r.lon,
-                                        displayName: vm.formatLocation(r),
-                                      );
+                                  final locationVM = context
+                                      .read<LocationViewModel>();
+                                  final display = vm.formatLocation(r);
+
+                                  locationVM.setManualLocation(
+                                    lat: r.lat,
+                                    lon: r.lon,
+                                    displayName: display,
+                                  );
+
+                                  locationVM.addRecentLocation(
+                                    RecentLocation(
+                                      lat: r.lat,
+                                      lon: r.lon,
+                                      displayName: display,
+                                      country: r.address['country'] ?? '',
+                                    ),
+                                  );
 
                                   Navigator.pop(context);
                                 },
@@ -90,7 +105,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildRecentSearches(),
+                          _buildRecentSearches(recent),
                           const SizedBox(height: 32),
                           // _buildPopularCities(),
                         ],
@@ -182,7 +197,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
-        leading: const Icon(Icons.location_on, color: Colors.redAccent),
+        leading: Icon(Icons.location_on, color: Colors.blue[400]),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         subtitle: Text(subtitle),
         onTap: onTap,
@@ -190,7 +205,9 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
     );
   }
 
-  Widget _buildRecentSearches() {
+  Widget _buildRecentSearches(List<RecentLocation> recent) {
+    if (recent.isEmpty) return const SizedBox();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -203,31 +220,31 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey[600],
-                letterSpacing: 0.5,
               ),
             ),
             TextButton(
               onPressed: () {
-                // Clear all recent searches
+                context.read<LocationViewModel>().clearRecentLocations();
               },
-              child: const Text(
+              child: Text(
                 'Clear All',
                 style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[600],
                 ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        ...recentSearches.map((location) => _buildRecentSearchItem(location)),
+
+        ...recent.map((r) => _buildRecentItem(r)),
       ],
     );
   }
 
-  Widget _buildRecentSearchItem(String location) {
+  Widget _buildRecentItem(RecentLocation r) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -235,87 +252,18 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
-        leading: Icon(Icons.history, color: Colors.grey[400], size: 24),
-        title: Text(
-          location,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-        ),
-        trailing: Icon(Icons.north_west, color: Colors.grey[300], size: 20),
+        leading: Icon(Icons.history, color: Colors.grey[400]),
+        title: Text(r.displayName),
+        subtitle: Text(r.country),
         onTap: () {
-          // Handle location selection
-          Navigator.pop(context, location);
+          context.read<LocationViewModel>().setManualLocation(
+            lat: r.lat,
+            lon: r.lon,
+            displayName: r.displayName,
+          );
+          Navigator.pop(context);
         },
       ),
     );
   }
-
-  // Widget _buildPopularCities() {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Text(
-  //         'POPULAR CITIES',
-  //         style: TextStyle(
-  //           fontSize: 13,
-  //           fontWeight: FontWeight.bold,
-  //           color: Colors.grey[600],
-  //           letterSpacing: 0.5,
-  //         ),
-  //       ),
-  //       const SizedBox(height: 16),
-  //       GridView.builder(
-  //         shrinkWrap: true,
-  //         physics: const NeverScrollableScrollPhysics(),
-  //         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-  //           crossAxisCount: 2,
-  //           crossAxisSpacing: 12,
-  //           mainAxisSpacing: 12,
-  //           childAspectRatio: 3.5,
-  //         ),
-  //         itemCount: popularCities.length,
-  //         itemBuilder: (context, index) {
-  //           return _buildCityCard(
-  //             popularCities[index]['name']!,
-  //             popularCities[index]['flag']!,
-  //           );
-  //         },
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // Widget _buildCityCard(String cityName, String flag) {
-  //   return InkWell(
-  //     onTap: () {
-  //       // Handle city selection
-  //       Navigator.pop(context, cityName);
-  //     },
-  //     borderRadius: BorderRadius.circular(16),
-  //     child: Container(
-  //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-  //       decoration: BoxDecoration(
-  //         color: Colors.white,
-  //         borderRadius: BorderRadius.circular(16),
-  //       ),
-  //       child: Row(
-  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //         children: [
-  //           Text(
-  //             cityName,
-  //             style: const TextStyle(
-  //               fontSize: 16,
-  //               fontWeight: FontWeight.w600,
-  //               color: Colors.black87,
-  //             ),
-  //           ),
-  //           Text(flag, style: const TextStyle(fontSize: 20)),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 }

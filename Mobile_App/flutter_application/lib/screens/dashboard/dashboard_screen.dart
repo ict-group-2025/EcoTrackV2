@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/items/location_search_sheet.dart';
 import 'package:flutter_application/views/location_view_model.dart';
+import 'package:flutter_application/views/weather_view_model.dart';
 import 'package:provider/provider.dart';
 import '../../services/app_state.dart';
 import '../../widgets/weather_card.dart';
@@ -19,6 +20,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  String? _lastLocationCoordinate;
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +45,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 _buildHeader(),
                 const SizedBox(height: 24),
-                WeatherCard(weather: appState.getWeatherData()),
+                // WeatherCard(weather: appState.getWeatherData()),
+                _buildWeather(),
                 const SizedBox(height: 16),
                 AQICard(aqi: appState.getAQIData()),
                 const SizedBox(height: 16),
@@ -67,11 +71,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildHeader() {
     return Consumer<LocationViewModel>(
       builder: (context, vm, _) {
-       final String locationText = vm.isLoading
+        final String locationText = vm.isLoading
             ? 'Loading...'
             : vm.displayLocation;
 
-          
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -95,15 +98,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ],
                 ),
-                Text(
-                  locationText,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+               FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    locationText,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ),
+                )
               ],
             ),
             GestureDetector(
@@ -125,6 +129,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         );
+      },
+    );
+  }
+
+  Widget _buildWeather() {
+    return Consumer2<LocationViewModel, WeatherViewModel>(
+      builder: (context, locationVM, weatherVM, _) {
+        /// Chưa có tọa độ thì không load
+        if (locationVM.coordinate == null) {
+          return const SizedBox();
+        }
+
+        /// Trigger load weather khi location thay đổi
+        final coordStr =
+            '${locationVM.coordinate!.latitude},${locationVM.coordinate!.longitude}';
+        if (_lastLocationCoordinate != coordStr) {
+          _lastLocationCoordinate = coordStr;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            weatherVM.loadWeather(
+              locationVM.coordinate!.latitude,
+              locationVM.coordinate!.longitude,
+            );
+          });
+        }
+
+        if (weatherVM.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (weatherVM.weather == null) {
+          return const Text('No weather data');
+        }
+
+        return WeatherCard(weather: weatherVM.weather!);
       },
     );
   }

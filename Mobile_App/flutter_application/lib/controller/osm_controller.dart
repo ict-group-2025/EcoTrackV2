@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter_application/models/geo_model.dart';
 import 'package:flutter_application/models/osm_address.dart';
 import 'package:http/http.dart' as http;
@@ -21,7 +22,8 @@ class OsmController {
 
     final json = jsonDecode(response.body);
 
-
+    log('📦 [OSM SEARCH] Status: ${response.statusCode}');
+    log('📦 [OSM SEARCH] Raw body: ${response.body}');
     return OsmAddress.fromJson(json);
   }
 }

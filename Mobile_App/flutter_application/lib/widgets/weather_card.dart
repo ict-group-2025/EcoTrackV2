@@ -1,15 +1,19 @@
-
 import 'package:flutter/material.dart';
-import '../models/data_models.dart';
+import 'package:flutter_application/models/weather_model.dart';
+import 'package:flutter_application/utils/weather_image_mapper.dart';
 
 class WeatherCard extends StatelessWidget {
-  final WeatherData weather;
+  final WeatherModel weather;
 
   const WeatherCard({super.key, required this.weather});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final imagePath = WeatherImageMapper.fromModel(weather);
+
+    return 
+    
+    Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -34,12 +38,12 @@ class WeatherCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'H:${weather.highTemp}°  L:${weather.lowTemp}°',
+                'High:${weather.highTemp}°  Low:${weather.lowTemp}°',
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
-          const Icon(Icons.wb_sunny, size: 100, color: Colors.orange),
+          Image.asset(imagePath, width: 100),
         ],
       ),
     );
