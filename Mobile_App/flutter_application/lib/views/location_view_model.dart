@@ -101,9 +101,9 @@ class LocationViewModel extends ChangeNotifier {
     if (address!.district != null) {
       parts.add(_normalizeVietnameseLocation(address!.district!));
     }
-    if (address!.city != null) {
-      parts.add(_normalizeVietnameseLocation(address!.city!));
-    }
+    // if (address!.city != null) {
+    //   parts.add(_normalizeVietnameseLocation(address!.city!));
+    // }
 
     return parts.join(', ');
   }
@@ -130,7 +130,7 @@ class LocationViewModel extends ChangeNotifier {
     }
     notifyListeners();
   }
-  //clear list
+  //clear
 void clearRecentLocations() {
     _recentLocations.clear();
     notifyListeners();

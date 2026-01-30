@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/items/location_search_sheet.dart';
 import 'package:flutter_application/views/location_view_model.dart';
@@ -98,16 +99,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ],
                 ),
-               FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    locationText,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
+                AutoSizeText(
+                  locationText,
+                  minFontSize: 24,
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle( fontWeight: FontWeight.bold),
+                ),
               ],
             ),
             GestureDetector(
@@ -136,7 +134,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildWeather() {
     return Consumer2<LocationViewModel, WeatherViewModel>(
       builder: (context, locationVM, weatherVM, _) {
-        /// Chưa có tọa độ thì không load
+        // Chưa có tọa độ thì không load
         if (locationVM.coordinate == null) {
           return const SizedBox();
         }

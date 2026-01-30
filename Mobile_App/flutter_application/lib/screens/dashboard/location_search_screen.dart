@@ -16,18 +16,6 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  // Mock data - replace with actual data
-  final List<String> recentSearches = ['New York, NY', 'London, UK'];
-
-  final List<Map<String, String>> popularCities = [
-    {'name': 'Tokyo', 'flag': '🇯🇵'},
-    {'name': 'Paris', 'flag': '🇫🇷'},
-    {'name': 'Sydney', 'flag': '🇦🇺'},
-    {'name': 'Dubai', 'flag': '🇦🇪'},
-    {'name': 'Singapore', 'flag': '🇸🇬'},
-    {'name': 'Berlin', 'flag': '🇩🇪'},
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -65,16 +53,27 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                     ? Consumer<SearchViewModel>(
                         builder: (context, vm, _) {
                           if (vm.isLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.blue[400],
+                              ),
                             );
                           }
 
                           return Column(
                             children: vm.results.map((r) {
+                              final city =
+                                  r.address['city'] ?? r.address['state'] ?? '';
+                              final country = r.address['country'] ?? '';
+                              final subtitle = [
+                                city,
+                                country,
+                              ].where((e) => e.isNotEmpty).join(', ');
                               return _buildSearchResultItem(
                                 title: vm.formatLocation(r),
-                                subtitle: r.address['country'] ?? '',
+                                subtitle: subtitle.isEmpty
+                                    ? 'Unknown'
+                                    : subtitle,
                                 onTap: () {
                                   final locationVM = context
                                       .read<LocationViewModel>();
@@ -92,6 +91,10 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                                       lon: r.lon,
                                       displayName: display,
                                       country: r.address['country'] ?? '',
+                                      city:
+                                          r.address['city'] ??
+                                          r.address['state'] ??
+                                          '',
                                     ),
                                   );
 
@@ -141,6 +144,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                 borderRadius: BorderRadius.circular(28),
               ),
               child: TextField(
+                cursorColor: Colors.black,
                 controller: _searchController,
                 focusNode: _focusNode,
                 decoration: InputDecoration(
@@ -254,7 +258,9 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
       child: ListTile(
         leading: Icon(Icons.history, color: Colors.grey[400]),
         title: Text(r.displayName),
-        subtitle: Text(r.country),
+        subtitle: Text(
+          [r.city, r.country].where((e) => e.isNotEmpty).join(', '),
+        ),
         onTap: () {
           context.read<LocationViewModel>().setManualLocation(
             lat: r.lat,

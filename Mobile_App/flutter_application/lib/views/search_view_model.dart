@@ -22,12 +22,13 @@ class SearchViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
+
     _debounce = Timer(const Duration(milliseconds: 400), _search);
   }
 
 
  Future<void> _search() async {
-    if (query.trim().length < 1) {
+    if (query.trim().length < 2) {
       results = [];
       notifyListeners();
       return;
@@ -61,48 +62,38 @@ class SearchViewModel extends ChangeNotifier {
  String formatLocation(OsmSearch r) {
     final a = r.address;
 
-    final countryCode = a['country_code']?.toString().toLowerCase();
-    final isVietnam = countryCode == 'vn';
+    // Ưu tiên cấp thấp nhất trước
+    final candidates = [
+      a['suburb'], // phường / khu phố
+      a['village'], // xã
+      a['neighbourhood'],
+      a['city_district'], // quận
+      a['county'],
+      a['city'],
+    ];
 
-    String? district = a['city_district'] ?? a['county'] ?? a['suburb'];
-    String? city = a['city'] ?? a['state'];
-
-    if (district != null && city != null) {
-      if (isVietnam) {
-        district = _normalizeVietnamese(district);
-        city = _normalizeVietnamese(city);
-        return '$district, $city';
-      } else {
-        return _breakLongLocation('$district, $city');
+    for (final c in candidates) {
+      if (c != null && c.toString().trim().isNotEmpty) {
+        return _normalizeVietnameseLocation(c.toString());
       }
     }
 
-    // fallback cho displayName
-    if (isVietnam) {
-      return _normalizeVietnamese(r.displayName.split(',').take(2).join(', '));
-    }
-
-    return _breakLongLocation(r.displayName.split(',').take(3).join(', '));
+    // fallback
+    return r.displayName.split(',').first;
   }
-
-
-String _normalizeVietnamese(String value) {
+String _normalizeVietnameseLocation(String value) {
     return value
-        .replaceAll(
-          RegExp(r'^(Phường|Xã|Thị trấn|Quận|Huyện)\s+', caseSensitive: false),
-          '',
-        )
-        .replaceAll(RegExp(r'^(Thành phố|TP\.?)\s+', caseSensitive: false), '')
-        .replaceAll(RegExp(r'^Tỉnh\s+', caseSensitive: false), '')
-        .replaceAll(RegExp(r'\s*,\s*'), ', ')
-        .replaceAll(RegExp(r'\s{2,}'), ' ')
+        .replaceAll(RegExp(r'^Phường\s+', caseSensitive: false), '')
+        .replaceAll(RegExp(r'^Xã\s+', caseSensitive: false), '')
+        .replaceAll(RegExp(r'^Thị trấn\s+', caseSensitive: false), '')
+        .replaceAll(RegExp(r'^Quận\s+', caseSensitive: false), '')
+        .replaceAll(RegExp(r'^Huyện\s+', caseSensitive: false), '')
+        .replaceAll(RegExp(r'^Thành phố\s+', caseSensitive: false), '')
         .trim();
   }
-String _breakLongLocation(String value) {
-    final parts = value.split(',');
-    if (parts.length <= 2) return value;
 
-    return '${parts[0].trim()},\n${parts.sublist(1).join(',').trim()}';
-  }
+
+
+
 
 }
