@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/controller/location_controller.dart';
 import 'package:flutter_application/controller/osm_controller.dart';
 import 'package:flutter_application/controller/osm_search_controller.dart';
+import 'package:flutter_application/controller/weather_controller.dart';
 import 'package:flutter_application/views/location_view_model.dart';
 import 'package:flutter_application/views/search_view_model.dart';
+import 'package:flutter_application/views/weather_view_model.dart';
 import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'services/app_state.dart';
@@ -19,8 +21,11 @@ void main() {
             osmController: OsmController(),
           ),
         ),
-          ChangeNotifierProvider(
+        ChangeNotifierProvider(
           create: (_) => SearchViewModel(controller: OsmSearchController()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => WeatherViewModel(WeatherController()),
         ),
       ],
       child: const MyApp(),
