@@ -21,8 +21,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  String? _lastLocationCoordinate;
-
   @override
   void initState() {
     super.initState();
@@ -51,7 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 16),
                 AQICard(aqi: appState.getAQIData()),
                 const SizedBox(height: 16),
-                WeatherDetailsRow(weather: appState.getWeatherData()),
+                _buildWeatherDetail(),
                 const SizedBox(height: 16),
                 HealthAdviceCard(aqi: appState.getAQIData()),
                 const SizedBox(height: 24),
@@ -104,7 +102,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   minFontSize: 24,
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle( fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -132,36 +130,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildWeather() {
-    return Consumer2<LocationViewModel, WeatherViewModel>(
-      builder: (context, locationVM, weatherVM, _) {
-        // Chưa có tọa độ thì không load
-        if (locationVM.coordinate == null) {
+    return Consumer<WeatherViewModel>(
+      builder: (_, vm, __) {
+        if (vm.isLoading) {
+          return const CircularProgressIndicator();
+        }
+        if (vm.error != null) {
+          return Text(vm.error!);
+        }
+        if (vm.weather == null) {
           return const SizedBox();
         }
+        return WeatherCard(weather: vm.weather!);
+      },
+    );
+  }
 
-        /// Trigger load weather khi location thay đổi
-        final coordStr =
-            '${locationVM.coordinate!.latitude},${locationVM.coordinate!.longitude}';
-        
-        if (_lastLocationCoordinate != coordStr) {
-          _lastLocationCoordinate = coordStr;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            weatherVM.loadWeather(
-              locationVM.coordinate!.latitude,
-              locationVM.coordinate!.longitude,
-            );
-          });
+  Widget _buildWeatherDetail() {
+    return Consumer<WeatherViewModel>(
+      builder: (_, vm, __) {
+          if (vm.isLoading) {
+          return const CircularProgressIndicator();
         }
-
-        if (weatherVM.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+        if (vm.error != null) {
+          return Text(vm.error!);
         }
-
-        if (weatherVM.weather == null) {
-          return const Text('No weather data');
+        if (vm.weather == null) {
+          return const SizedBox();
         }
-
-        return WeatherCard(weather: weatherVM.weather!);
+        return WeatherDetailsRow(weather: vm.weather!);
       },
     );
   }

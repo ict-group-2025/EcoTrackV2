@@ -11,7 +11,7 @@ class AQICard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -45,8 +45,10 @@ class AQICard extends StatelessWidget {
                 // Text ở giữa
                 Positioned(
                   child: Column(
+                    
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      SizedBox(height: 10),
                       Text(
                         '${aqi.aqi}',
                         style: const TextStyle(
@@ -64,7 +66,6 @@ class AQICard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(

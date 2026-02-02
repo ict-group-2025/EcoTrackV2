@@ -235,7 +235,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[600],
+                  color: Colors.red[400],
                 ),
               ),
             ),

@@ -24,8 +24,12 @@ void main() {
         ChangeNotifierProvider(
           create: (_) => SearchViewModel(controller: OsmSearchController()),
         ),
-        ChangeNotifierProvider(
-          create: (_) => WeatherViewModel(WeatherController()),
+        ChangeNotifierProxyProvider<LocationViewModel, WeatherViewModel>(
+          create: (context) => WeatherViewModel(
+            WeatherController(),
+            context.read<LocationViewModel>(),
+          ),
+          update: (_, locationVM, weatherVM) => weatherVM!,
         ),
       ],
       child: const MyApp(),

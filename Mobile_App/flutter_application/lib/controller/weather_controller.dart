@@ -20,17 +20,7 @@ class WeatherController {
 
     final json = jsonDecode(res.body);
 
-    final weather = json['weather'][0];
-    final main = json['main'];
     log(res.body.toString());
-    return WeatherModel(
-      temperature: (main['temp'] - 273.15).round(),
-      highTemp: (main['temp_max'] - 273.15).round(),
-      lowTemp: (main['temp_min'] - 273.15).round(),
-      condition: weather['main'],
-      icon: weather['icon'],
-      conditionCode: weather['id'],
-      isDay: weather['icon'].endsWith('d'),
-    );
+    return WeatherModel.fromJson(json);
   }
 }
