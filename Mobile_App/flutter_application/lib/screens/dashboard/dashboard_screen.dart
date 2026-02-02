@@ -142,6 +142,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         /// Trigger load weather khi location thay đổi
         final coordStr =
             '${locationVM.coordinate!.latitude},${locationVM.coordinate!.longitude}';
+        
         if (_lastLocationCoordinate != coordStr) {
           _lastLocationCoordinate = coordStr;
           WidgetsBinding.instance.addPostFrameCallback((_) {

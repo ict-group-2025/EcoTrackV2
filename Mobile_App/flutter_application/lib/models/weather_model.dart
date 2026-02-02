@@ -16,6 +16,7 @@ class WeatherModel {
     required this.icon,
     required this.conditionCode,
     required this.isDay,
+
   });
 
   

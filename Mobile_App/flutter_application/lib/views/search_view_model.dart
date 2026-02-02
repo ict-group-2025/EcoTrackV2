@@ -13,8 +13,7 @@ class SearchViewModel extends ChangeNotifier {
   String query = '';
   Timer? _debounce;
 
-
- void onQueryChanged(String value) {
+  void onQueryChanged(String value) {
     query = value;
     _debounce?.cancel();
     if (query.trim().isEmpty) {
@@ -26,8 +25,7 @@ class SearchViewModel extends ChangeNotifier {
     _debounce = Timer(const Duration(milliseconds: 400), _search);
   }
 
-
- Future<void> _search() async {
+  Future<void> _search() async {
     if (query.trim().length < 2) {
       results = [];
       notifyListeners();
@@ -48,18 +46,21 @@ class SearchViewModel extends ChangeNotifier {
     }
   }
 
-
   List<OsmSearch> _filterAdministrative(List<OsmSearch> list) {
     return list.where((e) {
       final a = e.address;
-      return a.containsKey('city_district') ||
+      return a.containsKey('suburb') ||
+          a.containsKey('village') ||
+          a.containsKey('neighbourhood') ||
+          a.containsKey('city_district') ||
           a.containsKey('county') ||
-          a.containsKey('suburb') ||
           a.containsKey('city');
+      //  || a.containsKey('state') ||
+      // a.containsKey('region');
     }).toList();
   }
 
- String formatLocation(OsmSearch r) {
+  String formatLocation(OsmSearch r) {
     final a = r.address;
 
     // Ưu tiên cấp thấp nhất trước
@@ -81,7 +82,8 @@ class SearchViewModel extends ChangeNotifier {
     // fallback
     return r.displayName.split(',').first;
   }
-String _normalizeVietnameseLocation(String value) {
+
+  String _normalizeVietnameseLocation(String value) {
     return value
         .replaceAll(RegExp(r'^Phường\s+', caseSensitive: false), '')
         .replaceAll(RegExp(r'^Xã\s+', caseSensitive: false), '')
@@ -91,9 +93,4 @@ String _normalizeVietnameseLocation(String value) {
         .replaceAll(RegExp(r'^Thành phố\s+', caseSensitive: false), '')
         .trim();
   }
-
-
-
-
-
 }

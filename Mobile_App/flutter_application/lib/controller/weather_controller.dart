@@ -1,10 +1,9 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:http/http.dart' as http;
 import '../models/weather_model.dart';
 
 class WeatherController {
-
-
   Future<WeatherModel> fetchWeather({
     required double lat,
     required double lon,
@@ -23,7 +22,7 @@ class WeatherController {
 
     final weather = json['weather'][0];
     final main = json['main'];
-
+    log(res.body.toString());
     return WeatherModel(
       temperature: (main['temp'] - 273.15).round(),
       highTemp: (main['temp_max'] - 273.15).round(),
