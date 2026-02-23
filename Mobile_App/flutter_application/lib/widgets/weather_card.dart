@@ -26,7 +26,7 @@ class WeatherCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${weather.temperature}°',
+                '${weather.temp}°',
                 style: const TextStyle(
                   fontSize: 64,
                   fontWeight: FontWeight.bold,
@@ -38,7 +38,7 @@ class WeatherCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'High:${weather.highTemp}°  Low:${weather.lowTemp}°',
+                _buildTempExtra(weather),
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
@@ -47,5 +47,11 @@ class WeatherCard extends StatelessWidget {
         ],
       ),
     );
+  }
+  String _buildTempExtra(WeatherModel w) {
+    if (w.highTemp.round() == w.lowTemp.round()) {
+      return 'Feels like ${w.feelsLike.round()}°';
+    }
+    return 'High:${w.highTemp.round()}°  Low:${w.lowTemp.round()}°';
   }
 }

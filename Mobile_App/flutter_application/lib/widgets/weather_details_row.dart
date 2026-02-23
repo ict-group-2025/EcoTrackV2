@@ -1,53 +1,87 @@
-
 import 'package:flutter/material.dart';
-import '../models/data_models.dart';
+import 'package:flutter_application/models/weather_model.dart';
 
 class WeatherDetailsRow extends StatelessWidget {
-  final WeatherData weather;
+  final WeatherModel weather;
 
   const WeatherDetailsRow({super.key, required this.weather});
 
   @override
   Widget build(BuildContext context) {
+    final String timeRise =
+        '${weather.sunrise.hour}:${weather.sunrise.minute.toString().padLeft(2, '0')}';
+        final String timeSet =
+        '${weather.sunset.hour}:${weather.sunset.minute.toString().padLeft(2, '0')}';
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Column(
         children: [
-          _buildWeatherDetail(
-            Icons.water_drop_outlined,
-            '${weather.humidity}%',
-            'HUMIDITY',
+          // Row 1: Humidity & Wind
+          Row(
+            children: [
+              Expanded(
+                child: _buildWeatherDetail(
+                  Icons.water_drop_outlined,
+                  '${weather.humidity}%',
+                  'HUMIDITY',
+                  Colors.blue
+                ),
+              ),
+              Expanded(
+                child: _buildWeatherDetail(
+                  Icons.air,
+                  '${weather.windSpeed} km/h',
+                  'WIND',
+                  Colors.grey
+                ),
+              ),
+            ],
           ),
-          _buildWeatherDetail(Icons.air, '${weather.windSpeed} km/h', 'WIND'),
-          _buildWeatherDetail(
-            Icons.wb_sunny_outlined,
-            weather.uvIndex,
-            'UV INDEX',
+
+          const SizedBox(height: 10),
+
+          // Row 2: Sunrise & Sunset
+          Row(
+            children: [
+              Expanded(
+                child: _buildWeatherDetail(
+                  Icons.wb_sunny,
+                timeRise , // Thêm sunrise vào WeatherModel
+                  'SUNRISE',
+                  Colors.orange
+                ),
+              ),
+              Expanded(
+                child: _buildWeatherDetail(
+                  Icons.nights_stay,
+                  timeSet, // Thêm sunset vào WeatherModel
+                  'SUNSET',
+                  Colors.orange
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildWeatherDetail(IconData icon, String value, String label) {
+  Widget _buildWeatherDetail(IconData icon, String value, String label,Color color) {
     return Column(
       children: [
-        Icon(icon, color: Colors.grey[400], size: 32),
-        const SizedBox(height: 8),
+        Icon(icon, color: color, size: 26),
         Text(
           value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 9,
             color: Colors.grey[600],
             letterSpacing: 0.5,
           ),

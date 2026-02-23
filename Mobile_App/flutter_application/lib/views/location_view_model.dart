@@ -18,8 +18,14 @@ class LocationViewModel extends ChangeNotifier {
   String? _lastDisplayLocation;
   bool get isManualLocation => _isManual;
   final List<RecentLocation> _recentLocations = [];
+  VoidCallback? onLocationChanged;
+  //callback
+  void _notifyLocationChanged() {
+    notifyListeners();
+    onLocationChanged?.call();
+  }
 
-    //contructor
+  //contructor
   LocationViewModel({
     required this.locationController,
     required this.osmController,
@@ -29,16 +35,16 @@ class LocationViewModel extends ChangeNotifier {
   List<RecentLocation> get recentLocations =>
       List.unmodifiable(_recentLocations);
 
-
-//gps current
+  //gps current
   Future<void> useCurrentLocation() async {
     _isManual = false;
     _manualDisplayLocation = null;
+    _lastDisplayLocation = null;
 
     await loadLocation();
   }
 
-//load search location
+  //load search location
   Future<void> loadLocation() async {
     if (isLoading) return;
     try {
@@ -74,7 +80,7 @@ class LocationViewModel extends ChangeNotifier {
       error = e.toString();
     } finally {
       isLoading = false;
-      notifyListeners();
+      _notifyLocationChanged();
     }
   }
 
@@ -101,9 +107,9 @@ class LocationViewModel extends ChangeNotifier {
     if (address!.district != null) {
       parts.add(_normalizeVietnameseLocation(address!.district!));
     }
-    if (address!.city != null) {
-      parts.add(_normalizeVietnameseLocation(address!.city!));
-    }
+    // if (address!.city != null) {
+    //   parts.add(_normalizeVietnameseLocation(address!.city!));
+    // }
 
     return parts.join(', ');
   }
@@ -119,8 +125,9 @@ class LocationViewModel extends ChangeNotifier {
     coordinate = GeoModel(latitude: lat, longitude: lon);
     _manualDisplayLocation = displayName;
 
-    notifyListeners();
+    _notifyLocationChanged();
   }
+
   // add recent list
   void addRecentLocation(RecentLocation location) {
     _recentLocations.removeWhere((e) => e.displayName == location.displayName);
@@ -130,10 +137,10 @@ class LocationViewModel extends ChangeNotifier {
     }
     notifyListeners();
   }
-  //clear list
-void clearRecentLocations() {
+
+  //clear
+  void clearRecentLocations() {
     _recentLocations.clear();
     notifyListeners();
   }
-
 }

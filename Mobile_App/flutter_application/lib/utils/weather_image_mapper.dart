@@ -35,8 +35,8 @@ class WeatherImageMapper {
 
     if (code == 803 || code == 804) {
       return isDay
-          ? 'assets/images/scattered_clouds_day.png'
-          : 'assets/images/scattered_clouds_night.png';
+          ? 'assets/images/clouds.png'
+          : 'assets/images/clouds.png';
     }
 
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/controller/air_quality_controller.dart';
 import 'package:flutter_application/controller/location_controller.dart';
 import 'package:flutter_application/controller/osm_controller.dart';
 import 'package:flutter_application/controller/osm_search_controller.dart';
 import 'package:flutter_application/controller/weather_controller.dart';
+import 'package:flutter_application/views/air_quality_view_model.dart';
 import 'package:flutter_application/views/location_view_model.dart';
 import 'package:flutter_application/views/search_view_model.dart';
 import 'package:flutter_application/views/weather_view_model.dart';
@@ -24,8 +26,19 @@ void main() {
         ChangeNotifierProvider(
           create: (_) => SearchViewModel(controller: OsmSearchController()),
         ),
-        ChangeNotifierProvider(
-          create: (_) => WeatherViewModel(WeatherController()),
+        ChangeNotifierProxyProvider<LocationViewModel, WeatherViewModel>(
+          create: (context) => WeatherViewModel(
+            WeatherController(),
+            context.read<LocationViewModel>(),
+          ),
+          update: (_, locationVM, weatherVM) => weatherVM!,
+        ),
+        ChangeNotifierProxyProvider<LocationViewModel, AirQualityViewModel>(
+          create: (context) => AirQualityViewModel(
+            AirQualityController(),
+            context.read<LocationViewModel>(),
+          ),
+          update: (_, locationVM, airQualityVM) => airQualityVM!,
         ),
       ],
       child: const MyApp(),
