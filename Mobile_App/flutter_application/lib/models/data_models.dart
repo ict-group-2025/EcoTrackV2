@@ -1,7 +1,6 @@
-
 import 'dart:ui';
 
-class WeatherData { 
+class WeatherData {
   final String condition;
   final int temperature;
   final int highTemp;
@@ -47,12 +46,14 @@ class ForecastData {
   final String icon;
   final int temperature;
   final String status;
+  final int humidity;
 
   ForecastData({
     required this.time,
     required this.icon,
     required this.temperature,
     required this.status,
+    required this.humidity,
   });
 }
 
