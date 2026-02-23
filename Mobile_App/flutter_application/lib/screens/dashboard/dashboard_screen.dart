@@ -1,8 +1,11 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/items/location_search_sheet.dart';
+import 'package:flutter_application/views/air_quality_view_model.dart';
 import 'package:flutter_application/views/location_view_model.dart';
 import 'package:flutter_application/views/weather_view_model.dart';
+import 'package:flutter_application/widgets/box_skeleton.dart';
+import 'package:flutter_application/models/data_models.dart';
 import 'package:provider/provider.dart';
 import '../../services/app_state.dart';
 import '../../widgets/weather_card.dart';
@@ -42,12 +45,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(),
+                _shimmerHeader(),
                 const SizedBox(height: 24),
                 // WeatherCard(weather: appState.getWeatherData()),
                 _buildWeather(),
                 const SizedBox(height: 16),
-                AQICard(aqi: appState.getAQIData()),
+                _buildAQICard(),
                 const SizedBox(height: 16),
                 _buildWeatherDetail(),
                 const SizedBox(height: 16),
@@ -67,13 +70,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _shimmerHeader() {
+    return SizedBox(
+      height: 51,
+      child: Consumer<LocationViewModel>(
+        builder: (_, vm, __) {
+          if (vm.isLoading) {
+            return const BoxSkeleton(height: double.infinity);
+          }
+
+          return _buildHeader();
+        },
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Consumer<LocationViewModel>(
       builder: (context, vm, _) {
-        final String locationText = vm.isLoading
-            ? 'Loading...'
-            : vm.displayLocation;
-
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -98,7 +112,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
                 AutoSizeText(
-                  locationText,
+                  vm.displayLocation,
                   minFontSize: 24,
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
@@ -132,16 +146,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildWeather() {
     return Consumer<WeatherViewModel>(
       builder: (_, vm, __) {
-        if (vm.isLoading) {
-          return const CircularProgressIndicator();
-        }
-        if (vm.error != null) {
-          return Text(vm.error!);
-        }
-        if (vm.weather == null) {
-          return const SizedBox();
-        }
-        return WeatherCard(weather: vm.weather!);
+        return SizedBox(
+          height: 191,
+          child: vm.isLoading || vm.weather == null
+              ? const BoxSkeleton(height: double.infinity)
+              : WeatherCard(weather: vm.weather!),
+        );
       },
     );
   }
@@ -149,16 +159,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildWeatherDetail() {
     return Consumer<WeatherViewModel>(
       builder: (_, vm, __) {
-          if (vm.isLoading) {
-          return const CircularProgressIndicator();
+        return SizedBox(
+          height: 148,
+          child: vm.isLoading || vm.weather == null
+              ? BoxSkeleton(height: double.infinity)
+              : WeatherDetailsRow(weather: vm.weather!),
+        );
+      },
+    );
+  }
+
+  Widget _buildAQICard() {
+    return Consumer<AirQualityViewModel>(
+      builder: (_, vm, __) {
+        if (vm.isLoading || vm.currentItem == null) {
+          return const BoxSkeleton(height: 180);
         }
-        if (vm.error != null) {
-          return Text(vm.error!);
-        }
-        if (vm.weather == null) {
-          return const SizedBox();
-        }
-        return WeatherDetailsRow(weather: vm.weather!);
+
+        final aqi = vm.currentAQI ?? 0;
+        final quality = vm.getQualityLevel();
+        final description = vm.getQualityDescription();
+
+        final aqiData = AQIData(
+          aqi: aqi,
+          quality: quality,
+          description: description,
+        );
+
+        return SizedBox(height: 180, child: AQICard(aqi: aqiData));
       },
     );
   }
