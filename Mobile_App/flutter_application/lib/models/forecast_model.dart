@@ -1,6 +1,5 @@
 import 'package:flutter_application/models/data_models.dart';
 import 'package:flutter_application/utils/weather_image_mapper.dart';
-import 'package:intl/intl.dart';
 
 class ForecastResponse {
   final int cod;
@@ -74,15 +73,6 @@ class ForecastItem {
   /// Convert to UI-friendly ForecastData
   ForecastData toForecastData() {
     int toC(dynamic k) => (k - 273.15).round();
-
-    String formatTime(String raw) {
-      try {
-        final dt = DateTime.parse(raw).toLocal();
-        return DateFormat('h a').format(dt);
-      } catch (_) {
-        return raw;
-      }
-    }
 
     // convert dtTxt string into local hour with AM/PM
     String formattedTime() {

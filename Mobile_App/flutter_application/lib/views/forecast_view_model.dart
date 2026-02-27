@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_application/views/location_view_model.dart';
 
-import '../controller/forecast_controller.dart';
+import '../controller/dashboard_controller/forecast_controller.dart';
 import '../models/forecast_model.dart';
 import '../models/data_models.dart';
 

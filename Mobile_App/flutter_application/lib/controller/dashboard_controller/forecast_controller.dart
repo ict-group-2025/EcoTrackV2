@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
-import '../models/forecast_model.dart';
+import '../../models/forecast_model.dart';
 
 class ForecastController {
   Future<ForecastResponse> fetchForecast({

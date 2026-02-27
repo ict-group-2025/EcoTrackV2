@@ -17,7 +17,7 @@ class ForecastSection extends StatelessWidget {
               '24-Hour Forecast',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            TextButton(onPressed: () {}, child: const Text('See Detail',style: TextStyle(color: Colors.blue),)),
+            TextButton(onPressed: () {}, child: const Text('See Detail ',style: TextStyle(color: Colors.blue),)),
           ],
         ),
         const SizedBox(height: 12),

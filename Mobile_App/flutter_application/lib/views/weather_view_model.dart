@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_application/views/location_view_model.dart';
 
-import '../controller/weather_controller.dart';
+import '../controller/dashboard_controller/weather_controller.dart';
 import '../models/weather_model.dart';
 
 class WeatherViewModel extends ChangeNotifier {
