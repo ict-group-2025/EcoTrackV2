@@ -35,30 +35,34 @@ class AppState extends ChangeNotifier {
 
   List<ForecastData> getForecastData() {
     return [
-      ForecastData(time: 'Now', icon: 'sunny', temperature: 72, status: 'good'),
+      ForecastData(time: 'Now', icon: 'sunny', temperature: 72, status: 'good', humidity: 55),
       ForecastData(
         time: '2 PM',
         icon: 'sunny',
         temperature: 75,
         status: 'good',
+        humidity: 60,
       ),
       ForecastData(
         time: '4 PM',
         icon: 'cloudy',
         temperature: 73,
         status: 'moderate',
+        humidity: 65,
       ),
       ForecastData(
         time: '6 PM',
         icon: 'cloudy',
         temperature: 68,
         status: 'moderate',
+        humidity: 70,
       ),
       ForecastData(
         time: '8 PM',
         icon: 'rainy',
         temperature: 64,
         status: 'good',
+        humidity: 80,
       ),
     ];
   }

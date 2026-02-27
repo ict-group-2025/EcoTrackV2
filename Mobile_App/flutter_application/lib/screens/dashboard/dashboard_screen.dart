@@ -2,10 +2,12 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/items/location_search_sheet.dart';
 import 'package:flutter_application/views/air_quality_view_model.dart';
+import 'package:flutter_application/views/forecast_view_model.dart';
 import 'package:flutter_application/views/location_view_model.dart';
 import 'package:flutter_application/views/weather_view_model.dart';
 import 'package:flutter_application/widgets/box_skeleton.dart';
 import 'package:flutter_application/models/data_models.dart';
+// import 'package:flutter_application/widgets/forecast_section_v2.dart';
 import 'package:provider/provider.dart';
 import '../../services/app_state.dart';
 import '../../widgets/weather_card.dart';
@@ -56,9 +58,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 16),
                 HealthAdviceCard(aqi: appState.getAQIData()),
                 const SizedBox(height: 24),
-                ForecastSection(forecasts: appState.getForecastData()),
+                _buildForecastSection(),
+                // _buildForecastSectionV2(),
                 const SizedBox(height: 24),
-                PollutantsSection(pollutants: appState.getPollutants()),
+                _buildPollutantsSection(),
                 const SizedBox(height: 24),
                 NewsSection(articles: appState.getNewsArticles()),
                 const SizedBox(height: 20),
@@ -187,6 +190,101 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
 
         return SizedBox(height: 180, child: AQICard(aqi: aqiData));
+      },
+    );
+  }
+
+  Widget _buildForecastSection() {
+    return Consumer<ForecastViewModel>(
+      builder: (_, vm, __) {
+        if (vm.isLoading) {
+          return const BoxSkeleton(height: 160);
+        }
+
+        if (vm.error != null) {
+          return Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Center(child: Text('Error: ${vm.error}')),
+          );
+        }
+
+        if (vm.forecasts.isEmpty) {
+          return const BoxSkeleton(height: 160);
+        }
+
+        return ForecastSection(forecasts: vm.forecasts);
+      },
+    );
+  }
+
+  // Widget _buildForecastSectionV2() {
+  //   return Consumer<ForecastViewModel>(
+  //     builder: (_, vm, __) {
+  //       if (vm.isLoading || vm.forecasts.isEmpty) {
+  //         return const BoxSkeleton(height: 180);
+  //       }
+
+  //       if (vm.error != null) {
+  //         return Container(
+  //           padding: const EdgeInsets.all(12),
+  //           decoration: BoxDecoration(
+  //             color: Colors.white,
+  //             borderRadius: BorderRadius.circular(24),
+  //           ),
+  //           child: Center(child: Text('Error: ${vm.error}')),
+  //         );
+  //       }
+
+  //       return ForecastSectionV2(forecasts: vm.forecasts);
+  //     },
+  //   );
+  // }
+
+  Widget _buildPollutantsSection() {
+    return Consumer<AirQualityViewModel>(
+      builder: (_, vm, __) {
+        if (vm.isLoading || vm.currentItem == null) {
+          return const BoxSkeleton(height: 180);
+        }
+
+        final quality = vm.getQualityLevel();
+
+        final pollutants = <PollutantData>[
+          PollutantData(
+            symbol: 'PM2.5',
+            name: 'PM2.5',
+            value: vm.currentItem!.components.pm25,
+            unit: 'µg/m³',
+            status: quality,
+          ),
+          PollutantData(
+            symbol: 'PM10',
+            name: 'PM10',
+            value: vm.currentItem!.components.pm10,
+            unit: 'µg/m³',
+            status: quality,
+          ),
+          PollutantData(
+            symbol: 'O3',
+            name: 'Ozone',
+            value: vm.currentItem!.components.o3,
+            unit: 'µg/m³',
+            status: quality,
+          ),
+          PollutantData(
+            symbol: 'NO2',
+            name: 'Nitrogen dioxide',
+            value: vm.currentItem!.components.no2,
+            unit: 'µg/m³',
+            status: quality,
+          ),
+        ];
+
+        return PollutantsSection(pollutants: pollutants);
       },
     );
   }

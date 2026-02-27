@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_application/views/location_view_model.dart';
 
-import '../controller/air_quality_controller.dart';
+import '../controller/dashboard_controller/air_quality_controller.dart';
 import '../models/air_quality_model.dart';
 
 class AirQualityViewModel extends ChangeNotifier {

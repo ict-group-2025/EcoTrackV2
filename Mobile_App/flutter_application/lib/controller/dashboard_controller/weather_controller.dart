@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
-import '../models/weather_model.dart';
+import '../../models/weather_model.dart';
 
 class WeatherController {
   Future<WeatherModel> fetchWeather({

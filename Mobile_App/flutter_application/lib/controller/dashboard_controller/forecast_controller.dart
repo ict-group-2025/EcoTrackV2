@@ -1,26 +1,26 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
-import '../models/air_quality_model.dart';
+import '../../models/forecast_model.dart';
 
-class AirQualityController {
-  Future<AirQualityModel> fetchAirQuality({
+class ForecastController {
+  Future<ForecastResponse> fetchForecast({
     required double lat,
     required double lon,
   }) async {
     final url =
-        'http://api.openweathermap.org/data/2.5/air_pollution'
+        'https://api.openweathermap.org/data/2.5/forecast'
         '?lat=$lat&lon=$lon&appid=76805f1ca0234e4568454f73948dbfdb';
 
     final res = await http.get(Uri.parse(url));
 
     if (res.statusCode != 200) {
-      throw Exception('Failed to load air quality');
+      throw Exception('Failed to load forecast');
     }
 
-    final json = jsonDecode(res.body);
+    final json = jsonDecode(res.body) as Map<String, dynamic>;
 
     log(res.body.toString());
-    return AirQualityModel.fromJson(json);
+    return ForecastResponse.fromJson(json);
   }
 }

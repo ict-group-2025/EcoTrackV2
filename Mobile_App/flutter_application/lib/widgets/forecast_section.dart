@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../models/data_models.dart';
 
@@ -18,7 +17,7 @@ class ForecastSection extends StatelessWidget {
               '24-Hour Forecast',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            TextButton(onPressed: () {}, child: const Text('See Detail')),
+            TextButton(onPressed: () {}, child: const Text('See Detail ',style: TextStyle(color: Colors.blue),)),
           ],
         ),
         const SizedBox(height: 12),
@@ -37,16 +36,14 @@ class ForecastSection extends StatelessWidget {
   }
 
   Widget _buildForecastCard(ForecastData forecast, bool isNow) {
-    final indicatorColor = forecast.status == 'good'
-        ? Colors.green
-        : Colors.orange;
+    final int humidity = (forecast.humidity.clamp(0, 100));
 
     return Container(
       width: 80,
-      margin: const EdgeInsets.only(right: 12),
+      margin: EdgeInsetsGeometry.only(right: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isNow ?  Colors.blue.shade100 : Colors.white,
+        color: isNow ? Colors.blue.shade100 : Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -54,47 +51,27 @@ class ForecastSection extends StatelessWidget {
         children: [
           Text(
             forecast.time,
-            style: TextStyle(
-              fontSize: 12,
-              color:  Colors.black87,
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.black87),
           ),
-          Icon(
-            _getWeatherIcon(forecast.icon),
-            color:  Colors.orange,
-            size: 32,
-          ),
+          // use asset image provided by mapper
+          Image.asset(forecast.icon, width: 32, height: 32),
           Text(
             '${forecast.temperature}°',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color:  Colors.black,
+              color: Colors.black,
             ),
           ),
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: indicatorColor,
-              borderRadius: BorderRadius.circular(2),
-            ),
+          Row(mainAxisAlignment: MainAxisAlignment.center,
+            // ignore: sort_child_properties_last
+            children: [
+              Icon(Icons.water_drop_outlined, color: Colors.blue,size: 12,),
+              Text("${humidity.toString()}%", style: TextStyle(fontSize: 12)),
+            ],
           ),
         ],
       ),
     );
-  }
-
-  IconData _getWeatherIcon(String icon) {
-    switch (icon) {
-      case 'sunny':
-        return Icons.wb_sunny;
-      case 'cloudy':
-        return Icons.cloud;
-      case 'rainy':
-        return Icons.water_drop;
-      default:
-        return Icons.wb_sunny;
-    }
   }
 }
