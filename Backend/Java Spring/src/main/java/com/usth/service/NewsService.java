@@ -36,7 +36,7 @@ public class NewsService {
 
     // Danh sách RSS feeds
     private static final List<RssSource> RSS_SOURCES = Arrays.asList(
-            new RssSource("VnExpress Thời tiết", "weather", "https://vnexpress.net/rss/thoi-tiet.rss"),
+            new RssSource("Tuổi Trẻ Thời tiết", "weather", "https://tuoitre.vn/rss/thoi-tiet.rss"),
             new RssSource("VnExpress Sức khỏe", "health", "https://vnexpress.net/rss/suc-khoe.rss"),
             new RssSource("VnExpress Môi trường", "air", "https://vnexpress.net/rss/moi-truong.rss"));
 
@@ -232,9 +232,12 @@ public class NewsService {
 
     private LocalDateTime parseRssDate(String dateStr) {
         try {
+            // Chuẩn hóa timezone: "GMT+7" → "+0700", "GMT+07" → "+0700"
+            String normalized = dateStr.replaceAll("GMT\\+?(\\d)$", "+0$100")
+                    .replaceAll("GMT\\+?(\\d{2})$", "+$100");
             // RFC 822 format: "Sun, 26 Jan 2026 10:00:00 +0700"
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-            ZonedDateTime zdt = ZonedDateTime.parse(dateStr, formatter);
+            ZonedDateTime zdt = ZonedDateTime.parse(normalized, formatter);
             return zdt.toLocalDateTime();
         } catch (Exception e) {
             // Fallback
