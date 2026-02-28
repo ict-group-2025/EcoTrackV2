@@ -41,6 +41,10 @@ dependencies:
 
   # Network & API
   http: ^1.1.0
+  cached_network_image: ^3.3.0
+  webview_flutter: ^4.7.0
+  flutter_inappwebview: ^6.0.0
+  url_launcher: ^6.1.12
 
   # Local Storage
   shared_preferences: ^2.2.2

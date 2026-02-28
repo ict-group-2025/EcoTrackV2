@@ -166,7 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: double.infinity,
                 child: TextButton(
                   style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
+                    backgroundColor: Colors.white.withOpacity(0.1),
                   ),
                   onPressed: () async {
                     await auth.logout();

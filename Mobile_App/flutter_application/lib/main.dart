@@ -3,6 +3,7 @@ import 'package:flutter_application/screens/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Thêm thư viện này
 import 'package:flutter_application/controller/auth_controller.dart';
+import 'package:flutter_application/controller/news_controller.dart';
 
 // Các import hiện tại của bạn
 import 'package:flutter_application/controller/dashboard_controller/air_quality_controller.dart';
@@ -26,6 +27,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthController()),
+        ChangeNotifierProvider(create: (context) => NewsController()),
         ChangeNotifierProvider(create: (context) => AppState()),
         ChangeNotifierProvider(
           create: (_) => LocationViewModel(

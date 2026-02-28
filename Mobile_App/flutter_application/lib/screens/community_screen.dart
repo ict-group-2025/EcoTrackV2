@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/app_state.dart';
 import '../widgets/community_message_card.dart';
-import '../widgets/news_card.dart';
+import '../utils/news_article_card.dart';
 
 class CommunityScreen extends StatelessWidget {
   const CommunityScreen({super.key});
@@ -25,8 +25,6 @@ class CommunityScreen extends StatelessWidget {
                 _buildHeader(),
                 const SizedBox(height: 24),
                 _buildLiveCommunity(messages),
-                const SizedBox(height: 24),
-                _buildNewsFeed(articles),
                 const SizedBox(height: 80),
               ],
             ),
@@ -140,66 +138,66 @@ class CommunityScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNewsFeed(List articles) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'News Feed',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            TextButton(onPressed: () {}, child: const Text('View All')),
-          ],
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          decoration: InputDecoration(
-            hintText: 'Search insights & topics...',
-            prefixIcon: const Icon(Icons.search, color: Colors.grey),
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 50,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              _buildFilterChip('All', true),
-              _buildFilterChip('Health', false),
-              _buildFilterChip('Environment', false),
-              _buildFilterChip('Global', false),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...articles.map((article) => NewsCard(article: article)).toList(),
-      ],
-    );
-  }
+  // Widget _buildNewsFeed(List articles) {
+  //   return Column(
+  //     children: [
+  //       Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //         children: [
+  //           const Text(
+  //             'News Feed',
+  //             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  //           ),
+  //           TextButton(onPressed: () {}, child: const Text('View All')),
+  //         ],
+  //       ),
+  //       const SizedBox(height: 12),
+  //       TextField(
+  //         decoration: InputDecoration(
+  //           hintText: 'Search insights & topics...',
+  //           prefixIcon: const Icon(Icons.search, color: Colors.grey),
+  //           filled: true,
+  //           fillColor: Colors.white,
+  //           border: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(12),
+  //             borderSide: BorderSide.none,
+  //           ),
+  //         ),
+  //       ),
+  //       const SizedBox(height: 16),
+  //       SizedBox(
+  //         height: 50,
+  //         child: ListView(
+  //           scrollDirection: Axis.horizontal,
+  //           children: [
+  //             _buildFilterChip('All', true),
+  //             _buildFilterChip('Health', false),
+  //             _buildFilterChip('Environment', false),
+  //             _buildFilterChip('Global', false),
+  //           ],
+  //         ),
+  //       ),
+  //       const SizedBox(height: 16),
+  //       ...articles.map((article) => NewsCard(article: article)).toList(),
+  //     ],
+  //   );
+  // }
 
-  Widget _buildFilterChip(String label, bool isSelected) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (bool selected) {},
-        backgroundColor: Colors.white,
-        selectedColor: const Color(0xFF1F2937),
-        labelStyle: TextStyle(
-          color: isSelected ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.w600,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      ),
-    );
-  }
+  // Widget _buildFilterChip(String label, bool isSelected) {
+  //   return Container(
+  //     margin: const EdgeInsets.only(right: 8),
+  //     child: FilterChip(
+  //       label: Text(label),
+  //       selected: isSelected,
+  //       onSelected: (bool selected) {},
+  //       backgroundColor: Colors.white,
+  //       selectedColor: const Color(0xFF1F2937),
+  //       labelStyle: TextStyle(
+  //         color: isSelected ? Colors.white : Colors.black87,
+  //         fontWeight: FontWeight.w600,
+  //       ),
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //     ),
+  //   );
+  // }
 }
