@@ -4,6 +4,7 @@ import 'dashboard/dashboard_screen.dart';
 import 'community_screen.dart';
 import 'analysis_screen.dart';
 import 'control_center_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const DashboardScreen(),
     const CommunityScreen(),
     const AnalysisScreen(),
-    const ControlCenterScreen(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {

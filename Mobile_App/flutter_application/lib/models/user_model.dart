@@ -6,6 +6,11 @@ class User {
   final String? token;
   final String? role;
   final int? avatarId;
+  final String? userLocation;
+  final int? warningCount;
+  final int? banCount;
+  final String? banExpiration;
+  final bool? banned;
 
   User({
     required this.id,
@@ -15,6 +20,11 @@ class User {
     this.token,
     this.role,
     this.avatarId,
+    this.userLocation,
+    this.warningCount,
+    this.banCount,
+    this.banExpiration,
+    this.banned,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -26,6 +36,11 @@ class User {
       token: json['token'],
       role: json['role'],
       avatarId: json['avatarId'] as int?,
+      userLocation: json['userLocation'],
+      warningCount: json['warningCount'] as int?,
+      banCount: json['banCount'] as int?,
+      banExpiration: json['banExpiration'],
+      banned: json['banned'] as bool?,
     );
   }
 
@@ -38,6 +53,11 @@ class User {
       if (token != null) 'token': token,
       if (role != null) 'role': role,
       if (avatarId != null) 'avatarId': avatarId,
+      if (userLocation != null) 'userLocation': userLocation,
+      if (warningCount != null) 'warningCount': warningCount,
+      if (banCount != null) 'banCount': banCount,
+      if (banExpiration != null) 'banExpiration': banExpiration,
+      if (banned != null) 'banned': banned,
     };
   }
 
@@ -49,6 +69,11 @@ class User {
     String? token,
     String? role,
     int? avatarId,
+    String? userLocation,
+    int? warningCount,
+    int? banCount,
+    String? banExpiration,
+    bool? banned,
   }) {
     return User(
       id: id ?? this.id,
@@ -58,6 +83,11 @@ class User {
       token: token ?? this.token,
       role: role ?? this.role,
       avatarId: avatarId ?? this.avatarId,
+      userLocation: userLocation ?? this.userLocation,
+      warningCount: warningCount ?? this.warningCount,
+      banCount: banCount ?? this.banCount,
+      banExpiration: banExpiration ?? this.banExpiration,
+      banned: banned ?? this.banned,
     );
   }
 
@@ -71,7 +101,12 @@ class User {
         other.email == email &&
         other.token == token &&
         other.role == role &&
-        other.avatarId == avatarId;
+        other.avatarId == avatarId &&
+        other.userLocation == userLocation &&
+        other.warningCount == warningCount &&
+        other.banCount == banCount &&
+        other.banExpiration == banExpiration &&
+        other.banned == banned;
   }
 
   @override
@@ -82,7 +117,12 @@ class User {
         email.hashCode ^
         token.hashCode ^
         role.hashCode ^
-        avatarId.hashCode;
+        avatarId.hashCode ^
+        userLocation.hashCode ^
+        warningCount.hashCode ^
+        banCount.hashCode ^
+        banExpiration.hashCode ^
+        banned.hashCode;
   }
 }
 

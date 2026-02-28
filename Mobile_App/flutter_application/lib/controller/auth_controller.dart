@@ -73,6 +73,36 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  Future<void> loadUserProfile() async {
+    _setLoading(true);
+    _errorMessage = null;
+
+    try {
+      final response = await AuthService.getCurrentUser();
+      
+      print('AuthController loadUserProfile - response.success: ${response.success}');
+      print('AuthController loadUserProfile - response.message: ${response.message}');
+      print('AuthController loadUserProfile - response.user: ${response.user}');
+
+      if (response.success && response.user != null) {
+        _user = response.user;
+        await _saveUserToPrefs(_user!);
+        print('Profile loaded successfully: $_user');
+        notifyListeners();
+      } else {
+        _errorMessage = response.message ?? 'Failed to load profile';
+        print('Profile load failed: $_errorMessage');
+        notifyListeners();
+      }
+    } catch (e) {
+      _errorMessage = 'Profile load error: ${e.toString()}';
+      print('Profile load exception: $_errorMessage');
+      notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<void> logout() async {
     _setLoading(true);
 
