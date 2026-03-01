@@ -5,8 +5,11 @@ import 'package:flutter_application/views/air_quality_view_model.dart';
 import 'package:flutter_application/views/forecast_view_model.dart';
 import 'package:flutter_application/views/location_view_model.dart';
 import 'package:flutter_application/views/weather_view_model.dart';
+import 'package:flutter_application/views/ai_forecast_view_model.dart';
 import 'package:flutter_application/widgets/box_skeleton.dart';
 import 'package:flutter_application/models/data_models.dart';
+import 'package:flutter_application/widgets/temperature_trend_card.dart';
+import 'package:flutter_application/widgets/temperature_trend_card_skeleton.dart';
 // import 'package:flutter_application/widgets/forecast_section_v2.dart';
 import 'package:provider/provider.dart';
 // import '../../services/app_state.dart';
@@ -51,6 +54,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 24),
                 // WeatherCard(weather: appState.getWeatherData()),
                 _buildWeather(),
+                Consumer<LocationViewModel>(
+                  builder: (context, locationVM, _) {
+                    // Hide AI forecast when using manual location selection
+                    if (locationVM.isManualLocation) {
+                      return const SizedBox.shrink();
+                    }
+                    return _buildAIForecastViewModel();
+                  },
+                ),
                 const SizedBox(height: 16),
                 _buildAQICard(),
                 const SizedBox(height: 16),
@@ -217,6 +229,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
 
         return ForecastSection(forecasts: vm.forecasts);
+      },
+    );
+  }
+
+  Widget _buildAIForecastViewModel() {
+    return Consumer<AIForecastViewModel>(
+      builder: (_, vm, __) {
+        if (vm.isLoading) {
+          return const TemperatureTrendCardSkeleton();
+        }
+        return Column(
+          children: [
+            const SizedBox(height: 16),
+            TemperatureTrendCard(
+              data: vm.temperaturePoints,
+              isLoading: vm.isLoading,
+              error: vm.error,
+            ),
+          ],
+        );
       },
     );
   }
