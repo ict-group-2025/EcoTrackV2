@@ -4,7 +4,7 @@ import 'dashboard/dashboard_screen.dart';
 import 'news_screen.dart';
 import 'community_screen.dart';
 import 'analysis_screen.dart';
-import 'control_center_screen.dart';
+// import 'control_center_screen.dart';
 import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
