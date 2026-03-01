@@ -10,6 +10,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class ChatController {
 
     private final ChatService chatService;
@@ -49,11 +51,40 @@ public class ChatController {
     @GetMapping("/api/chat/history/{locationId}")
     @ResponseBody
     public ResponseEntity<?> getChatHistory(
-            @PathVariable Long locationId,
+            @PathVariable String locationId,
             @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page,
             @org.springframework.web.bind.annotation.RequestParam(defaultValue = "50") int size) {
         try {
             return ResponseEntity.ok(chatService.getChatHistory(locationId, page, size));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+
+    // 3 REST API: Gửi tin nhắn mới (thay thế WebSocket cho frontend)
+    @org.springframework.web.bind.annotation.PostMapping("/api/chat/{locationId}/send")
+    @ResponseBody
+    public ResponseEntity<?> sendMessageRest(
+            @PathVariable String locationId,
+            @org.springframework.web.bind.annotation.RequestBody ChatMessage chatMessage) {
+        try {
+            if (chatMessage == null || chatMessage.getContent() == null || chatMessage.getContent().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Tin nhắn không được để trống");
+            }
+            ChatMessage saved = chatService.saveComment(locationId, chatMessage);
+            return ResponseEntity.ok(saved);
+        } catch (Exception e) {
+            log.error("Lỗi khi gửi tin nhắn REST: {}", e.getMessage());
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+
+    // 4 REST API: Lấy danh sách tất cả phòng chat (locations)
+    @GetMapping("/api/chat/locations")
+    @ResponseBody
+    public ResponseEntity<?> getAllChatLocations() {
+        try {
+            return ResponseEntity.ok(chatService.getAllLocationsWithStats());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
         }
