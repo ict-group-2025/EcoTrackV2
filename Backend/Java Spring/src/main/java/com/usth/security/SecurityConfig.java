@@ -71,6 +71,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/weather/**").permitAll()
                         .requestMatchers("/api/news/**").permitAll()
                         .requestMatchers("/api/chat/**").permitAll()
+                        .requestMatchers("/api/model/**").permitAll()
+                        .requestMatchers("/api/ai/**").permitAll()
                         .requestMatchers("/chat-websocket/**").permitAll()
                         .requestMatchers("/api/admin/stats").hasRole("ADMIN")
                         .requestMatchers("/ws/**").permitAll()

@@ -31,18 +31,26 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
+            log.info(">>> JWT Token received: {}", jwt != null ? "YES" : "NO");
+            
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
+                log.info(">>> JWT Valid. Username: {}", username);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                log.info(">>> UserDetails loaded: {}", username);
+                
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.info(">>> Authentication set to SecurityContext");
+            } else {
+                log.warn(">>> JWT token invalid or null");
             }
         } catch (Exception e) {
-            log.error("Cannot set user authentication: {}", e.getMessage());
+            log.error(">>> Cannot set user authentication: {}", e.getMessage(), e);
         }
 
         filterChain.doFilter(request, response);
