@@ -159,4 +159,24 @@ public class AdminController {
         Map<String, Long> stats = adminLogService.getStats();
         return ResponseEntity.ok(stats);
     }
+
+    // 7. Lấy danh sách Users
+    @GetMapping("/users")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        // Trả về thông tin cần thiết, loại bỏ sensitive data
+        var result = users.stream().map(u -> Map.of(
+                "id", u.getId(),
+                "username", u.getUsername(),
+                "fullName", u.getFullName() != null ? u.getFullName() : "",
+                "email", u.getEmail() != null ? u.getEmail() : "",
+                "role", u.getRole(),
+                "warningCount", u.getWarningCount(),
+                "banCount", u.getBanCount(),
+                "isBanned", u.isBanned(),
+                "banExpiration", u.getBanExpiration() != null ? u.getBanExpiration().toString() : ""))
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
 }

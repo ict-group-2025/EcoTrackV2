@@ -30,23 +30,54 @@ public class AuthController {
         public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
                 System.out.println(">>> LOGIN ATTEMPT: " + loginRequest.getUsername()); // DEBUG LOG
 
-                Authentication authentication = authenticationManager.authenticate(
-                                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
-                                                loginRequest.getPassword()));
+                // Check ban status before authenticate
+                var userOpt = userRepository.findByUsername(loginRequest.getUsername());
+                if (userOpt.isPresent()) {
+                        User checkUser = userOpt.get();
+                        // Auto-unban if ban expired
+                        if (checkUser.getBanExpiration() != null
+                                        && checkUser.getBanExpiration().isBefore(java.time.LocalDateTime.now())) {
+                                checkUser.setBanExpiration(null);
+                                userRepository.save(checkUser);
+                        }
+                        // Check permanent ban
+                        if (checkUser.isBanned()) {
+                                return ResponseEntity.status(403)
+                                                .body(java.util.Map.of("error", "Tài khoản đã bị khóa vĩnh viễn."));
+                        }
+                        // Check temp ban
+                        if (checkUser.getBanExpiration() != null
+                                        && checkUser.getBanExpiration().isAfter(java.time.LocalDateTime.now())) {
+                                return ResponseEntity.status(403)
+                                                .body(java.util.Map.of("error",
+                                                                "Tài khoản bị tạm khóa đến: "
+                                                                                + checkUser.getBanExpiration()));
+                        }
+                }
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                String jwt = jwtUtils.generateJwtToken(authentication);
+                try {
+                        Authentication authentication = authenticationManager.authenticate(
+                                        new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                                                        loginRequest.getPassword()));
 
-                org.springframework.security.core.userdetails.User userDetails = (org.springframework.security.core.userdetails.User) authentication
-                                .getPrincipal();
-                User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        String jwt = jwtUtils.generateJwtToken(authentication);
 
-                return ResponseEntity.ok(new JwtResponse(jwt,
-                                user.getId(),
-                                user.getUsername(),
-                                user.getFullName(),
-                                user.getRole(),
-                                user.getAvatarId()));
+                        org.springframework.security.core.userdetails.User userDetails = (org.springframework.security.core.userdetails.User) authentication
+                                        .getPrincipal();
+                        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
+
+                        return ResponseEntity.ok(new JwtResponse(jwt,
+                                        user.getId(),
+                                        user.getUsername(),
+                                        user.getFullName(),
+                                        user.getRole(),
+                                        user.getAvatarId(),
+                                        user.getWarningCount()));
+                } catch (Exception e) {
+                        return ResponseEntity.status(401)
+                                        .body(java.util.Map.of("error", "Sai tên đăng nhập hoặc mật khẩu."));
+                }
         }
 
         @PostMapping("/register")
@@ -82,7 +113,8 @@ public class AuthController {
                                 user.getUsername(),
                                 user.getFullName(),
                                 user.getRole(),
-                                user.getAvatarId()));
+                                user.getAvatarId(),
+                                0));
         }
 
         @GetMapping("/me")
