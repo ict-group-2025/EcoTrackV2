@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dự báo thời tiết AI - Hà Nội</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            color: #1a73e8;
+            text-align: center;
+        }
+        #status {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        #weather-chart {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            display: none; /* Ẩn đi khi chưa có ảnh */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #1a73e8;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .btn-update {
+            display: block;
+            margin: 0 auto 20px auto;
+            padding: 10px 20px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-update:hover {
+            background-color: #1557b0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🌤️ Dự Báo Thời Tiết Hà Nội (24h tới)</h1>
+        
+        <button class="btn-update" onclick="fetchWeatherData()">Cập nhật dữ liệu từ AI</button>
+        <div id="status">Bấm "Cập nhật" để lấy dữ liệu dự báo mới nhất...</div>
+
+        <div class="chart-container">
+            <img id="weather-chart" alt="Biểu đồ nhiệt độ">
+        </div>
+
+        <table id="weather-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>🕒 Thời Gian</th>
+                    <th>🌡️ Nhiệt Độ Dự Báo (°C)</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Hàm gọi API từ Backend FastAPI
+        function fetchWeatherData() {
+            const statusText = document.getElementById('status');
+            const chartImg = document.getElementById('weather-chart');
+            const table = document.getElementById('weather-table');
+            const tableBody = document.getElementById('table-body');
+
+            statusText.innerHTML = "⏳ Hệ thống AI đang phân tích dữ liệu, vui lòng đợi 2-5 giây...";
+            statusText.style.color = "#d93025";
+
+            // GỌI API ĐẾN MÁY CHỦ PYTHON CỦA BẠN
+            fetch('http://127.0.0.1:8000/api/forecast')
+                .then(response => response.json()) // Chuyển kết quả nhận được thành JSON
+                .then(result => {
+                    if(result.status === "success") {
+                        statusText.innerHTML = "✅ " + result.message;
+                        statusText.style.color = "#1e8e3e";
+
+                        // 1. Hiển thị ảnh biểu đồ (Từ mã Base64)
+                        chartImg.src = result.chart;
+                        chartImg.style.display = "block";
+
+                        // 2. Xóa dữ liệu bảng cũ (nếu có)
+                        tableBody.innerHTML = "";
+
+                        // 3. Đổ dữ liệu mới vào bảng
+                        result.data.forEach(item => {
+                            const row = `<tr>
+                                            <td><strong>${item.Thoi_Gian}</strong></td>
+                                            <td style="color: #d93025; font-weight: bold;">${item.Nhiet_Do_Du_Bao_C} °C</td>
+                                         </tr>`;
+                            tableBody.innerHTML += row;
+                        });
+
+                        // Hiện bảng lên
+                        table.style.display = "table";
+                    } else {
+                        statusText.innerHTML = "❌ Lỗi: " + result.message;
+                    }
+                })
+                .catch(error => {
+                    statusText.innerHTML = "❌ Không thể kết nối tới Server máy chủ. Hãy chắc chắn Terminal đang chạy 'uvicorn main:app --reload'.";
+                    console.error("Lỗi:", error);
+                });
+        }
+    </script>
+</body>
+</html>
