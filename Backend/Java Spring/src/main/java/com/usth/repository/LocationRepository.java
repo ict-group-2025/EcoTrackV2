@@ -11,4 +11,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     // Hàm này giúp tìm địa điểm theo tên (ví dụ tìm "Hanoi")
     // Dù chưa dùng ngay nhưng rất cần cho logic mở rộng sau này
     Optional<Location> findByCityName(String cityName);
+
+    // Tìm không phân biệt chữ hoa/thường (e.g. "hanoi" khớp "Hanoi")
+    Optional<Location> findByCityNameIgnoreCase(String cityName);
 }
