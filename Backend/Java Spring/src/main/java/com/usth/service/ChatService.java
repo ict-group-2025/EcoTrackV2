@@ -9,6 +9,7 @@ import com.usth.repository.LocationRepository;
 import com.usth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -128,6 +129,7 @@ public class ChatService {
         // Chuyển đổi từ Entity Comment sang Model ChatMessage
         List<ChatMessage> history = commentPage.getContent().stream().map(comment -> {
             ChatMessage msg = new ChatMessage();
+            msg.setCommentId(comment.getId()); // ID thật trong database
             if (comment.getUser() != null) {
                 msg.setSender(comment.getUser().getUsername());
                 msg.setUserId(comment.getUser().getId());
@@ -168,5 +170,21 @@ public class ChatService {
             item.put("messageCount", messageCount);
             return item;
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * User thu hồi tin nhắn của chính mình
+     */
+    @Transactional
+    public ResponseEntity<?> recallComment(Long commentId, String sender) {
+        return commentRepository.findById(commentId).map(comment -> {
+            // Kiểm tra chủ sở hữu tin nhắn
+            if (comment.getUser() == null || !comment.getUser().getUsername().equals(sender)) {
+                return ResponseEntity.badRequest().body("Bạn chỉ có thể thu hồi tin nhắn của chính mình!");
+            }
+            commentRepository.deleteById(commentId);
+            log.info("User {} đã thu hồi tin nhắn ID {}", sender, commentId);
+            return ResponseEntity.ok("Đã thu hồi tin nhắn");
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

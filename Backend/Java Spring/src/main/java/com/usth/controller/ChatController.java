@@ -89,4 +89,17 @@ public class ChatController {
             return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
         }
     }
+
+    // 5 REST API: User thu hồi tin nhắn của chính mình
+    @org.springframework.web.bind.annotation.DeleteMapping("/api/chat/comments/{commentId}")
+    @ResponseBody
+    public ResponseEntity<?> recallMessage(
+            @PathVariable Long commentId,
+            @org.springframework.web.bind.annotation.RequestParam String sender) {
+        try {
+            return chatService.recallComment(commentId, sender);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
 }
