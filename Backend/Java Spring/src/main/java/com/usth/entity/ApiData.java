@@ -56,6 +56,15 @@ public class ApiData {
     @Column(name = "so2")
     private Double so2;
 
+    @Column(name = "pm25")
+    private Double pm25;
+
+    @Column(name = "pm10")
+    private Double pm10;
+
+    @Column(name = "o3")
+    private Double o3;
+
     // --- THÔNG TIN CHUNG ---
 
     @Column(name = "recorded_at", nullable = false)

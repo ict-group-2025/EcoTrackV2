@@ -192,6 +192,13 @@ public class WeatherService {
                         builder.co(components.path("co").asDouble(0.0));
                         builder.no2(components.path("no2").asDouble(0.0));
                         builder.so2(components.path("so2").asDouble(0.0));
+                        // Thêm PM2.5, PM10, O3 cho AQI
+                        double pm25Val = components.path("pm2_5").asDouble(0.0);
+                        double pm10Val = components.path("pm10").asDouble(0.0);
+                        double o3Val = components.path("o3").asDouble(0.0);
+                        builder.pm25(pm25Val);
+                        builder.pm10(pm10Val);
+                        builder.o3(o3Val);
                     }
                 } catch (Exception e) {
                     log.warn("Không thể parse dữ liệu ô nhiễm cho location {}: {}", location.getCityName(),
@@ -234,7 +241,16 @@ public class WeatherService {
                     .lon(location.getLongitude()) // Map Lon
                     .co(apiData.getCo())
                     .no2(apiData.getNo2())
+                    .so2(apiData.getSo2())
+                    .pm25(apiData.getPm25())
+                    .pm10(apiData.getPm10())
+                    .o3(apiData.getO3())
                     .recordedAt(apiData.getRecordedAt());
+
+            // Tính AQI từ PM2.5 (US EPA)
+            if (apiData.getPm25() != null) {
+                builder.aqi(calculateAQI(apiData.getPm25()));
+            }
 
             // Tạo lời khuyên
             String advice = generateAdvice(apiData);
@@ -304,6 +320,31 @@ public class WeatherService {
         }
 
         return advice.toString();
+    }
+
+    /**
+     * Tính AQI từ PM2.5 theo công thức US EPA
+     */
+    private int calculateAQI(double pm25) {
+        // US EPA: Truncate PM2.5 to 1 decimal place before lookup
+        double c = Math.floor(pm25 * 10) / 10.0;
+
+        double[][] breakpoints = {
+                { 0.0, 12.0, 0, 50 },
+                { 12.1, 35.4, 51, 100 },
+                { 35.5, 55.4, 101, 150 },
+                { 55.5, 150.4, 151, 200 },
+                { 150.5, 250.4, 201, 300 },
+                { 250.5, 500.4, 301, 500 }
+        };
+
+        for (double[] bp : breakpoints) {
+            if (c >= bp[0] && c <= bp[1]) {
+                return (int) Math.round(
+                        ((bp[3] - bp[2]) / (bp[1] - bp[0])) * (c - bp[0]) + bp[2]);
+            }
+        }
+        return c > 500 ? 500 : 0;
     }
 
     // --- 5. TÁC VỤ TỰ ĐỘNG CẬP NHẬT (NHIỆM VỤ 2) ---

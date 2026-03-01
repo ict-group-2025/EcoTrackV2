@@ -28,6 +28,10 @@ public class WeatherResponse {
     private Double co; // Khí CO
     private Double no2; // Khí NO2
     private Double so2; // Khí SO2
+    private Double pm25; // PM2.5
+    private Double pm10; // PM10
+    private Double o3; // Ozone
+    private Integer aqi; // Chỉ số AQI (tính từ PM2.5 - US EPA)
 
     // 4. Thời gian cập nhật
     private LocalDateTime recordedAt;
