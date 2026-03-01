@@ -9,14 +9,14 @@ import 'package:flutter_application/widgets/box_skeleton.dart';
 import 'package:flutter_application/models/data_models.dart';
 // import 'package:flutter_application/widgets/forecast_section_v2.dart';
 import 'package:provider/provider.dart';
-import '../../services/app_state.dart';
+// import '../../services/app_state.dart';
 import '../../widgets/weather_card.dart';
 import '../../widgets/aqi_card.dart';
 import '../../widgets/weather_details_row.dart';
-import '../../widgets/health_advice_card.dart';
+// import '../../widgets/health_advice_card.dart';
 import '../../widgets/forecast_section.dart';
 import '../../widgets/pollutants_section.dart';
-import '../../widgets/news_section.dart';
+// import '../../widgets/news_section.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -37,7 +37,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
+    // final appState = Provider.of<AppState>(context);
 
     return Scaffold(
       body: SafeArea(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/screens/login_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Thêm thư viện này
+// import 'package:shared_preferences/shared_preferences.dart'; // Thêm thư viện này
 import 'package:flutter_application/controller/auth_controller.dart';
 import 'package:flutter_application/controller/news_controller.dart';
 

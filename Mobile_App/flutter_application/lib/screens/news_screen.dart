@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controller/news_controller.dart';
-import '../models/news_model.dart';
+// import '../models/news_model.dart';
 import '../utils/news_article_card.dart';
 
 class NewsScreen extends StatefulWidget {
@@ -20,9 +20,9 @@ class _NewsScreenState extends State<NewsScreen> with SingleTickerProviderStateM
     super.initState();
     _tabController = TabController(length: _categories.length, vsync: this);
     
-    // Load initial news
+    // Load initial news for first category (weather)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NewsController>().loadNews(category: 'health');
+      context.read<NewsController>().loadNews(category: _categories[0]);
     });
     
     // Listen to tab changes
