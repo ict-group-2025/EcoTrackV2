@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/app_state.dart';
+import '../controller/auth_controller.dart';
 import '../widgets/community_message_card.dart';
-// import '../utils/news_article_card.dart';
 
 class CommunityScreen extends StatelessWidget {
   const CommunityScreen({super.key});
@@ -34,46 +34,51 @@ class CommunityScreen extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Consumer<AuthController>(
+      builder: (context, auth, child) {
+        final user = auth.user;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Community',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Community',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'CONNECT & EXPLORE',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 4),
-            Text(
-              'CONNECT & EXPLORE',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-                letterSpacing: 1.2,
-              ),
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: const Color(0xFF2196F3),
+              child: user != null
+                  ? Text(
+                      user.fullName.substring(0, 1).toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.person,
+                      size: 24,
+                      color: Colors.white,
+                    ),
             ),
           ],
-        ),
-        Container(
-          width: 44,
-          height: 44,
-          decoration: const BoxDecoration(
-            color: Color(0xFF14B8A6),
-            shape: BoxShape.circle,
-          ),
-          child: const Center(
-            child: Text(
-              'JD',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 

@@ -10,6 +10,7 @@ class CompareCard extends StatelessWidget {
   final int? indoorAqi;
   final String indoorQualityLevel;
   final String? indoorPm25Display;
+  final Animation<double>? aqiAnimation;
 
   const CompareCard({
     super.key,
@@ -17,6 +18,7 @@ class CompareCard extends StatelessWidget {
     this.indoorAqi,
     required this.indoorQualityLevel,
     this.indoorPm25Display,
+    this.aqiAnimation,
   });
 
   @override
@@ -51,6 +53,7 @@ class CompareCard extends StatelessWidget {
               qualityLevel: indoorQualityLevel,
               panelColor: indoorPanelColor,
               pm25Display: indoorPm25Display,
+              animation: aqiAnimation,
             ),
           ),
         ],

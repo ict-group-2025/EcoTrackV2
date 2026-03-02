@@ -7,7 +7,6 @@ import 'package:flutter_application/widgets/compare_card.dart';
 import 'package:flutter_application/widgets/stats_row.dart';
 import '../controller/air_quality_controller.dart';
 
-
 class AirQualityScreen extends StatefulWidget {
   const AirQualityScreen({super.key});
 
@@ -15,26 +14,102 @@ class AirQualityScreen extends StatefulWidget {
   State<AirQualityScreen> createState() => _AirQualityScreenState();
 }
 
-class _AirQualityScreenState extends State<AirQualityScreen> {
+class _AirQualityScreenState extends State<AirQualityScreen> with TickerProviderStateMixin {
   bool _alertEnabled = true;
   late AirQualityController _controller;
   StreamSubscription? _dataSubscription;
+  
+  // Animation controllers for highlighting changes
+  final Map<String, AnimationController> _animationControllers = {};
+  final Map<String, Animation<double>> _animations = {};
+  
+  // Previous values for comparison
+  double? _prevTemp;
+  double? _prevHum;
+  double? _prevPres;
+  int? _prevAqi;
+  double? _prevPm25;
 
   @override
   void initState() {
     super.initState();
     _controller = AirQualityController();
     _controller.connect();
+    
+    // Initialize animation controllers
+    _initializeAnimations();
 
-    _dataSubscription = _controller.dataStream.listen((_) {
-      setState(() {});
+    _dataSubscription = _controller.dataStream.listen((data) {
+      if (mounted) {
+        _checkForChanges();
+        setState(() {});
+      }
     });
+  }
+  
+  void _initializeAnimations() {
+    final fields = ['temp', 'hum', 'pres', 'aqi', 'pm25'];
+    for (final field in fields) {
+      final controller = AnimationController(
+        duration: const Duration(milliseconds: 800),
+        vsync: this,
+      );
+      _animationControllers[field] = controller;
+      _animations[field] = Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeInOut,
+      ));
+    }
+  }
+  
+  void _checkForChanges() {
+    final model = _controller.model;
+    
+    if (_prevTemp != null && _prevTemp != model.temperature) {
+      _triggerAnimation('temp');
+    }
+    if (_prevHum != null && _prevHum != model.humidity) {
+      _triggerAnimation('hum');
+    }
+    if (_prevPres != null && _prevPres != model.pressure) {
+      _triggerAnimation('pres');
+    }
+    if (_prevAqi != null && _prevAqi != model.aqi) {
+      _triggerAnimation('aqi');
+    }
+    if (_prevPm25 != null && _prevPm25 != model.pm25) {
+      _triggerAnimation('pm25');
+    }
+    
+    // Update previous values
+    _prevTemp = model.temperature;
+    _prevHum = model.humidity;
+    _prevPres = model.pressure;
+    _prevAqi = model.aqi;
+    _prevPm25 = model.pm25;
+  }
+  
+  void _triggerAnimation(String field) {
+    final controller = _animationControllers[field];
+    if (controller != null) {
+      controller.reset();
+      controller.forward();
+    }
   }
 
   @override
   void dispose() {
     _dataSubscription?.cancel();
     _controller.dispose();
+    
+    // Dispose animation controllers
+    for (final controller in _animationControllers.values) {
+      controller.dispose();
+    }
+    
     super.dispose();
   }
 
@@ -81,6 +156,7 @@ class _AirQualityScreenState extends State<AirQualityScreen> {
                 indoorAqi: _convertedAQI,
                 indoorQualityLevel: model.getAQILevel(),
                 indoorPm25Display: model.pm25Display,
+                aqiAnimation: _animations['aqi'],
               ),
 
               const SizedBox(height: 12),
@@ -90,6 +166,9 @@ class _AirQualityScreenState extends State<AirQualityScreen> {
                 temperature: model.temperatureDisplay,
                 humidity: model.humidityDisplay,
                 pressure: model.pressureDisplay,
+                tempAnimation: _animations['temp'],
+                humAnimation: _animations['hum'],
+                presAnimation: _animations['pres'],
               ),
 
               const SizedBox(height: 12),

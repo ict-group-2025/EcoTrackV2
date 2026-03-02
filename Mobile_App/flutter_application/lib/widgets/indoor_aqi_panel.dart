@@ -5,6 +5,7 @@ class IndoorAQIPanel extends StatelessWidget {
   final String qualityLevel;
   final Color panelColor;
   final String? pm25Display;
+  final Animation<double>? animation;
 
   const IndoorAQIPanel({
     super.key,
@@ -12,45 +13,54 @@ class IndoorAQIPanel extends StatelessWidget {
     required this.qualityLevel,
     required this.panelColor,
     this.pm25Display,
+    this.animation,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: panelColor,
-      padding: const EdgeInsets.fromLTRB(18, 20, 18, 22),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildLabel(),
-          const SizedBox(height: 12),
-          Text(
-            aqi?.toString() ?? '--',
-            style: const TextStyle(
-              fontSize: 44,
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
-              height: 1,
-            ),
+    return AnimatedBuilder(
+      animation: animation ?? const AlwaysStoppedAnimation(0),
+      builder: (context, child) {
+        return Container(
+          color: panelColor,
+          padding: const EdgeInsets.fromLTRB(18, 20, 18, 22),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildLabel(),
+              const SizedBox(height: 12),
+              Transform.scale(
+                scale: 1.0 + (animation?.value ?? 0) * 0.1,
+                child: Text(
+                  aqi?.toString() ?? '--',
+                  style: const TextStyle(
+                    fontSize: 44,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                    height: 1,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                qualityLevel,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xDEFFFFFF),
+                ),
+              ),
+              const SizedBox(height: 10),
+              _buildProgressBar(),
+              const SizedBox(height: 8),
+              Text(
+                'PM2.5 · ${pm25Display ?? '--'} µg/m³',
+                style: const TextStyle(fontSize: 10, color: Color(0x8DFFFFFF)),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            qualityLevel,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Color(0xDEFFFFFF),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _buildProgressBar(),
-          const SizedBox(height: 8),
-          Text(
-            'PM2.5 · ${pm25Display ?? '--'} µg/m³',
-            style: const TextStyle(fontSize: 10, color: Color(0x8DFFFFFF)),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
