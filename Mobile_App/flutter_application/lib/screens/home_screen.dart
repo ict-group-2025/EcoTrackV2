@@ -1,8 +1,9 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application/screens/air_quality_screen.dart';
 import 'dashboard/dashboard_screen.dart';
 import 'news_screen.dart';
-import 'community_screen.dart';
+// import 'community_screen.dart';
 import 'analysis_screen.dart';
 // import 'control_center_screen.dart';
 import 'profile_screen.dart';
@@ -20,8 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const DashboardScreen(),
     const NewsScreen(),
-    const CommunityScreen(),
-    const AnalysisScreen(),
+    // const CommunityScreen(),
+    const AirQualityScreen(),
     ProfileScreen(),
   ];
 
@@ -50,12 +51,12 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _buildNavItem(Icons.home, 'Home', 0),
                 _buildNavItem(Icons.article_outlined, 'Tin tức', 1),
-                _buildNavItem(Icons.people_outline, 'Cộng đồng', 2),
-                _buildNavItem(Icons.bar_chart, 'Analysis', 3),
+                // _buildNavItem(Icons.people_outline, 'Cộng đồng', 2),
+                _buildNavItem(Icons.bar_chart, 'Analysis', 2),
                 _buildNavItem(
                   Icons.person_outline,
                   'Profile',
-                  4,
+                  3,
                   hasNotification: true,
                 ),
               ],

@@ -44,12 +44,11 @@ class AnalysisScreen extends StatelessWidget {
         Row(
           children: [
             const Text(
-              'Detailed AQI Analysis',
+              'IOT Device',
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
           ],
         ),
-        IconButton(icon: const Icon(Icons.share), onPressed: () {}),
       ],
     );
   }

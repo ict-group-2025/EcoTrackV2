@@ -5,6 +5,7 @@ import com.usth.entity.User;
 import com.usth.repository.CommentRepository;
 import com.usth.repository.UserRepository;
 import com.usth.service.AdminLogService;
+import com.usth.service.NewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +27,7 @@ public class AdminController {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final AdminLogService adminLogService;
+    private final NewsService newsService;
 
     // Helper: Lấy admin hiện tại từ JWT
     private User getCurrentAdmin() {
@@ -158,5 +160,29 @@ public class AdminController {
     public ResponseEntity<?> getLogStats() {
         Map<String, Long> stats = adminLogService.getStats();
         return ResponseEntity.ok(stats);
+    }
+
+    // 7. Cleanup duplicate news
+    @PostMapping("/news/cleanup")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> cleanupDuplicateNews() {
+        try {
+            int deletedCount = newsService.cleanupDuplicates();
+            return ResponseEntity.ok("✅ Đã xóa " + deletedCount + " tin tức trùng lặp");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("❌ Lỗi: " + e.getMessage());
+        }
+    }
+
+    // 8. Xóa toàn bộ tin tức weather
+    @DeleteMapping("/news/weather")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> clearAllWeatherNews() {
+        try {
+            int deletedCount = newsService.clearAllWeatherNews();
+            return ResponseEntity.ok("✅ Đã xóa " + deletedCount + " tin tức weather");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("❌ Lỗi: " + e.getMessage());
+        }
     }
 }

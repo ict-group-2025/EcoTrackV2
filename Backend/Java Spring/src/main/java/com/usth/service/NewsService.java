@@ -19,6 +19,7 @@ import java.time.*;
 import java.time.format.*;
 import java.util.*;
 import java.util.regex.*;
+import java.util.stream.Collectors;
 
 /**
  * Service xử lý tin tức
@@ -101,6 +102,55 @@ public class NewsService {
     }
 
     /**
+     * Xóa toàn bộ tin tức weather category
+     */
+    public int clearAllWeatherNews() {
+        logger.info("🗑️ Bắt đầu xóa toàn bộ tin tức weather...");
+        
+        List<News> weatherNews = newsRepository.findByCategoryOrderByPublishedAtDesc("weather");
+        int deletedCount = weatherNews.size();
+        
+        for (News news : weatherNews) {
+            newsRepository.delete(news);
+        }
+        
+        logger.info("✅ Đã xóa {} tin tức weather", deletedCount);
+        return deletedCount;
+    }
+
+    /**
+     * Cleanup duplicate news based on GUID
+     * Chạy một lần để dọn dẹp dữ liệu cũ
+     */
+    public int cleanupDuplicates() {
+        logger.info("🧹 Bắt đầu cleanup duplicate news...");
+        
+        // Lấy tất cả news, group by guid, giữ lại ID nhỏ nhất
+        List<News> allNews = newsRepository.findAll();
+        Map<String, List<News>> groupedByGuid = allNews.stream()
+                .filter(n -> n.getGuid() != null && !n.getGuid().trim().isEmpty())
+                .collect(java.util.stream.Collectors.groupingBy(News::getGuid));
+        
+        int deletedCount = 0;
+        for (Map.Entry<String, List<News>> entry : groupedByGuid.entrySet()) {
+            List<News> duplicates = entry.getValue();
+            if (duplicates.size() > 1) {
+                // Sắp xếp theo ID, giữ lại ID nhỏ nhất
+                duplicates.sort(Comparator.comparing(News::getId));
+                // Xóa tất cả trừ cái đầu tiên
+                for (int i = 1; i < duplicates.size(); i++) {
+                    newsRepository.delete(duplicates.get(i));
+                    deletedCount++;
+                }
+                logger.info("🗑️ Xóa {} duplicate cho GUID: {}", duplicates.size() - 1, entry.getKey());
+            }
+        }
+        
+        logger.info("✅ Hoàn tất cleanup: {} bản ghi duplicate đã xóa", deletedCount);
+        return deletedCount;
+    }
+
+    /**
      * Fetch tin từ tất cả RSS sources
      */
     public int ingestAllSources() {
@@ -140,9 +190,17 @@ public class NewsService {
                 Element item = (Element) items.item(i);
 
                 String guid = getElementText(item, "guid");
-                if (guid == null || guid.isEmpty()) {
+                if (guid == null || guid.trim().isEmpty()) {
                     guid = getElementText(item, "link");
                 }
+                
+                // Skip nếu không có GUID hoặc GUID rỗng
+                if (guid == null || guid.trim().isEmpty()) {
+                    logger.warn("⚠️ Bỏ qua item không có GUID/link");
+                    continue;
+                }
+                
+                guid = guid.trim();
 
                 // Skip nếu đã tồn tại
                 if (newsRepository.existsByGuid(guid)) {
