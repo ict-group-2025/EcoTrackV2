@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application/screens/air_quality_screen.dart';
 import 'dashboard/dashboard_screen.dart';
 import 'news_screen.dart';
 import 'community_screen.dart';
@@ -21,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const DashboardScreen(),
     const NewsScreen(),
     const CommunityScreen(),
-    const AnalysisScreen(),
+    const AirQualityScreen(),
     ProfileScreen(),
   ];
 
