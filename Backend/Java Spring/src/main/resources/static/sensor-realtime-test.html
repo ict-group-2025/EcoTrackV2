@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sensor Data Realtime Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .sensor-card { 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .data-item { display: flex; justify-content: space-between; margin: 5px 0; }
+        .timestamp { color: #666; font-size: 0.9em; }
+        .status { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+        button { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border: none; 
+            border-radius: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+        button:hover { background: #0056b3; }
+        .latest-data { font-size: 1.2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌡️ Sensor Data Realtime Test</h1>
+        
+        <div id="status" class="status disconnected">Disconnected</div>
+        
+        <div>
+            <button onclick="connect()">Connect Realtime</button>
+            <button onclick="disconnect()">Disconnect</button>
+            <button onclick="testAddData()">Add Test Data</button>
+        </div>
+
+        <div>
+            <h3>Location Filter:</h3>
+            <select id="locationFilter" onchange="filterByLocation()">
+                <option value="">All Locations</option>
+                <option value="Home_Hanoi">Home Hanoi</option>
+            </select>
+        </div>
+
+        <h3>📊 Latest Sensor Data</h3>
+        <div id="latestData"></div>
+
+        <h3>📈 Realtime Stream</h3>
+        <div id="dataStream"></div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let allData = [];
+
+        function connect() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            eventSource = new EventSource('/api/sensor-realtime/stream');
+            
+            eventSource.onopen = function() {
+                updateStatus('Connected', true);
+                console.log('Connected to SSE stream');
+            };
+
+            eventSource.onerror = function() {
+                updateStatus('Connection Error', false);
+                console.error('SSE connection error');
+            };
+
+            eventSource.addEventListener('initial-data', function(e) {
+                const data = JSON.parse(e.data);
+                allData = [data]; // Store as single item array
+                displayLatestData(data);
+                displayDataStream([data]);
+            });
+
+            eventSource.addEventListener('new-data', function(e) {
+                const data = JSON.parse(e.data);
+                allData.unshift(data); // Add to beginning
+                addNewDataStream(data);
+                updateLatestData();
+            });
+        }
+
+        function disconnect() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+                updateStatus('Disconnected', false);
+            }
+        }
+
+        function updateStatus(message, isConnected) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = 'status ' + (isConnected ? 'connected' : 'disconnected');
+        }
+
+        function displayLatestData(data) {
+            if (!data) return;
+            
+            const latestEl = document.getElementById('latestData');
+            latestEl.innerHTML = `
+                <div class="sensor-card latest-data">
+                    <div class="data-item"><strong>Location:</strong> ${data.location}</div>
+                    <div class="data-item"><strong>Temperature:</strong> ${data.temp}°C</div>
+                    <div class="data-item"><strong>Humidity:</strong> ${data.hum}%</div>
+                    <div class="data-item"><strong>Pressure:</strong> ${data.pres} hPa</div>
+                    <div class="data-item"><strong>AQI:</strong> ${data.aqi}</div>
+                    <div class="data-item"><strong>PM2.5:</strong> ${data.pm25}</div>
+                    <div class="timestamp">${new Date(data.timestamp).toLocaleString()}</div>
+                </div>
+            `;
+        }
+
+        function displayDataStream(data) {
+            const streamEl = document.getElementById('dataStream');
+            streamEl.innerHTML = '';
+            data.slice(0, 10).forEach(item => {
+                streamEl.appendChild(createSensorCard(item));
+            });
+        }
+
+        function addNewDataStream(data) {
+            const streamEl = document.getElementById('dataStream');
+            const card = createSensorCard(data);
+            streamEl.insertBefore(card, streamEl.firstChild);
+            
+            // Keep only last 20 items
+            while (streamEl.children.length > 20) {
+                streamEl.removeChild(streamEl.lastChild);
+            }
+        }
+
+        function createSensorCard(data) {
+            const card = document.createElement('div');
+            card.className = 'sensor-card';
+            card.innerHTML = `
+                <div class="data-item"><strong>Location:</strong> ${data.location}</div>
+                <div class="data-item"><strong>Temperature:</strong> ${data.temp}°C</div>
+                <div class="data-item"><strong>Humidity:</strong> ${data.hum}%</div>
+                <div class="data-item"><strong>Pressure:</strong> ${data.pres} hPa</div>
+                <div class="data-item"><strong>AQI:</strong> ${data.aqi}</div>
+                <div class="data-item"><strong>PM2.5:</strong> ${data.pm25}</div>
+                <div class="timestamp">${new Date(data.timestamp).toLocaleString()}</div>
+            `;
+            return card;
+        }
+
+        function updateLatestData() {
+            if (allData.length > 0) {
+                const sorted = [...allData].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                displayLatestData(sorted[0]);
+            }
+        }
+
+        async function testAddData() {
+            const testData = {
+                location: "Home_Hanoi",
+                temp: 20 + Math.random() * 10,
+                hum: 50 + Math.random() * 20,
+                pres: 800 + Math.random() * 50,
+                aqi: Math.floor(Math.random() * 100),
+                pm25: 10 + Math.random() * 40
+            };
+
+            try {
+                const response = await fetch('/api/sensor-realtime/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                
+                if (response.ok) {
+                    console.log('Test data added and broadcasted successfully');
+                }
+            } catch (error) {
+                console.error('Error adding test data:', error);
+            }
+        }
+
+        function filterByLocation() {
+            const location = document.getElementById('locationFilter').value;
+            if (location) {
+                const filtered = allData.filter(item => item.location === location);
+                displayDataStream(filtered);
+            } else {
+                displayDataStream(allData);
+            }
+        }
+
+        // Auto-connect on page load
+        window.onload = function() {
+            connect();
+        };
+    </script>
+</body>
+</html>
