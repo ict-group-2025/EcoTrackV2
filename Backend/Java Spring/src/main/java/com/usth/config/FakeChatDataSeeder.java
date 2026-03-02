@@ -17,7 +17,7 @@ import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
-@Order(2) // Chạy sau DataInitializer
+@Order(2)
 public class FakeChatDataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
@@ -25,7 +25,6 @@ public class FakeChatDataSeeder implements CommandLineRunner {
     private final CommentRepository commentRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // Danh sách fake users
     private static final String[][] FAKE_USERS = {
             { "weather_fan", "Thời Tiết Fan", "1" },
             { "rain_lover", "Mưa Yêu Thương", "2" },
@@ -39,7 +38,6 @@ public class FakeChatDataSeeder implements CommandLineRunner {
             { "rainbow_hunter", "Cầu Vồng", "10" }
     };
 
-    // Danh sách fake messages về thời tiết
     private static final String[] FAKE_MESSAGES = {
             "Hôm nay thời tiết đẹp quá! ☀️",
             "Trời mưa rồi, nhớ mang ô nhé mọi người 🌧️",
@@ -65,12 +63,10 @@ public class FakeChatDataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Chạy trong thread riêng để không block app
         new Thread(() -> {
             try {
-                Thread.sleep(5000); // Đợi DatabaseLoader load xong locations
+                Thread.sleep(5000);
 
-                // 1. Tạo fake users nếu chưa có
                 System.out.println(">>> Đang tạo fake users để test...");
                 for (String[] userData : FAKE_USERS) {
                     if (!userRepository.existsByUsername(userData[0])) {
@@ -88,7 +84,6 @@ public class FakeChatDataSeeder implements CommandLineRunner {
                 }
                 System.out.println(">>> ✅ Đã tạo " + FAKE_USERS.length + " fake users");
 
-                // 2. Lấy danh sách users và locations
                 List<User> fakeUsers = userRepository.findAll().stream()
                         .filter(u -> !u.getRole().equals("ADMIN"))
                         .toList();
@@ -99,20 +94,17 @@ public class FakeChatDataSeeder implements CommandLineRunner {
                     return;
                 }
 
-                // 3. Kiểm tra xem đã có chat data chưa
                 long existingComments = commentRepository.count();
                 if (existingComments > 50) {
                     System.out.println(">>> ℹ️ Đã có " + existingComments + " comments, bỏ qua seed data");
                     return;
                 }
 
-                // 4. Tạo fake messages cho mỗi location
                 System.out.println(">>> Đang tạo fake chat messages...");
                 Random random = new Random();
                 int totalMessages = 0;
 
                 for (Location location : locations) {
-                    // Mỗi location có 3-8 messages
                     int messageCount = 3 + random.nextInt(6);
 
                     for (int i = 0; i < messageCount; i++) {

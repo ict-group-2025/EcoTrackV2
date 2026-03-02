@@ -40,37 +40,30 @@ public class WeatherService {
     private static final String POLLUTION_API_URL = "https://api.openweathermap.org/data/2.5/air_pollution?lat=%f&lon=%f&appid=%s";
     private static final String FORECAST_API_URL = "https://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&appid=%s&units=metric&lang=vi";
 
-    // --- 1. LẤY DANH SÁCH CHO FORUM (TỐI ƯU: Tránh N+1 Query) ---
     public List<WeatherResponse> getAllLocations() {
         List<Location> locations = locationRepository.findAll();
 
-        // Tối ưu: Lấy tất cả ApiData mới nhất trong 1 query thay vì query từng location
         List<ApiData> latestApiDataList = apiDataRepository.findLatestApiDataForAllLocations();
 
-        // Tạo Map để tra cứu nhanh: locationId -> ApiData
         Map<Long, ApiData> apiDataMap = latestApiDataList.stream()
                 .collect(Collectors.toMap(
                         apiData -> apiData.getLocation().getId(),
                         apiData -> apiData,
-                        (existing, replacement) -> existing // Giữ bản cũ nếu trùng
+                        (existing, replacement) -> existing
                 ));
 
-        // Map sang DTO
         return locations.stream().map(location -> {
             ApiData latestData = apiDataMap.getOrDefault(location.getId(), new ApiData());
             return convertToDTO(location, latestData);
         }).collect(Collectors.toList());
     }
 
-    // --- 2. TÌM KIẾM & GỌI API ---
     public WeatherResponse getWeatherByCity(String cityName) {
         Optional<Location> existingLocation = locationRepository.findByCityName(cityName);
         Location location = existingLocation.orElseGet(() -> fetchCoordinatesAndCreateLocation(cityName));
 
-        // Gọi API lấy dữ liệu mới nhất
         ApiData apiData = fetchWeatherFromApi(location);
 
-        // Đẩy sang DTO để trả về Frontend hiển thị chi tiết
         return convertToDTO(location, apiData);
     }
 
@@ -87,7 +80,6 @@ public class WeatherService {
         }
     }
 
-    // --- 3. LOGIC GỌI API ---
     @SuppressWarnings("nullness")
     private Location fetchCoordinatesAndCreateLocation(String cityName) {
         if (cityName == null || cityName.trim().isEmpty()) {
@@ -115,7 +107,6 @@ public class WeatherService {
                 throw new RuntimeException("Không thể lấy tên thành phố từ API");
             }
 
-            // Check trùng lặp
             Optional<Location> check = locationRepository.findByCityName(standardName);
             if (check.isPresent())
                 return check.get();
@@ -157,8 +148,7 @@ public class WeatherService {
 
             String weatherResponse = Objects.requireNonNull(restTemplate.getForObject(weatherUrl, String.class),
                     "Không nhận được dữ liệu thời tiết từ API");
-            String pollutionResponse = restTemplate.getForObject(pollutionUrl, String.class); // Pollution API có thể
-                                                                                              // null
+            String pollutionResponse = restTemplate.getForObject(pollutionUrl, String.class);
 
             JsonNode wRoot = objectMapper.readTree(weatherResponse);
 
@@ -171,7 +161,6 @@ public class WeatherService {
                 throw new RuntimeException("Không có dữ liệu weather");
             }
 
-            // MAP TỪ JSON API -> ENTITY APIDATA
             ApiData.ApiDataBuilder builder = ApiData.builder()
                     .location(location)
                     .recordedAt(LocalDateTime.now())
@@ -183,7 +172,6 @@ public class WeatherService {
                     .weatherDescription(weatherArray.get(0).path("description").asText())
                     .weatherIcon(weatherArray.get(0).path("icon").asText());
 
-            // Xử lý dữ liệu ô nhiễm (có thể null)
             if (pollutionResponse != null) {
                 try {
                     JsonNode pRoot = objectMapper.readTree(pollutionResponse);
@@ -192,7 +180,6 @@ public class WeatherService {
                         builder.co(components.path("co").asDouble(0.0));
                         builder.no2(components.path("no2").asDouble(0.0));
                         builder.so2(components.path("so2").asDouble(0.0));
-                        // Thêm PM2.5, PM10, O3 cho AQI
                         double pm25Val = components.path("pm2_5").asDouble(0.0);
                         double pm10Val = components.path("pm10").asDouble(0.0);
                         double o3Val = components.path("o3").asDouble(0.0);
@@ -217,7 +204,6 @@ public class WeatherService {
         }
     }
 
-    // --- 4. HÀM MAP DỮ LIỆU TỪ ENTITY SANG DTO ---
     private WeatherResponse convertToDTO(Location location, ApiData apiData) {
         if (location == null) {
             throw new IllegalArgumentException("Location không được null");
@@ -228,17 +214,16 @@ public class WeatherService {
                 .cityName(location.getCityName())
                 .country(location.getCountryCode());
 
-        // Xử lý ApiData có thể null (khi chưa có dữ liệu)
         if (apiData != null && apiData.getId() != null) {
             builder.temperature(apiData.getTemperatureApi())
                     .humidity(apiData.getHumidity())
                     .pressure(apiData.getPressure())
                     .windSpeed(apiData.getWindSpeed())
-                    .weatherMain(apiData.getWeatherMain()) // Map weatherMain
+                    .weatherMain(apiData.getWeatherMain())
                     .weatherDescription(apiData.getWeatherDescription())
                     .weatherIcon(apiData.getWeatherIcon())
-                    .lat(location.getLatitude()) // Map Lat
-                    .lon(location.getLongitude()) // Map Lon
+                    .lat(location.getLatitude())
+                    .lon(location.getLongitude())
                     .co(apiData.getCo())
                     .no2(apiData.getNo2())
                     .so2(apiData.getSo2())
@@ -247,16 +232,13 @@ public class WeatherService {
                     .o3(apiData.getO3())
                     .recordedAt(apiData.getRecordedAt());
 
-            // Tính AQI từ PM2.5 (US EPA)
             if (apiData.getPm25() != null) {
                 builder.aqi(calculateAQI(apiData.getPm25()));
             }
 
-            // Tạo lời khuyên
             String advice = generateAdvice(apiData);
             builder.advice(advice);
 
-            // Tạo cảnh báo (Nếu có)
             String warning = generateWarning(apiData);
             builder.warning(warning);
         }
@@ -265,7 +247,6 @@ public class WeatherService {
     }
 
     private String generateWarning(ApiData data) {
-        // Trả về null nếu không có cảnh báo nguy hiểm
         String main = data.getWeatherMain().toLowerCase();
         double temp = data.getTemperatureApi();
 
@@ -282,13 +263,12 @@ public class WeatherService {
             return "CẢNH BÁO Ô NHIỄM: Chỉ số CO cực cao, không khí nguy hại!";
         }
 
-        return null; // An toàn
+        return null;
     }
 
     private String generateAdvice(ApiData data) {
         StringBuilder advice = new StringBuilder();
 
-        // 1. Dựa trên thời tiết chính
         String main = data.getWeatherMain().toLowerCase();
         if (main.contains("rain") || main.contains("drizzle")) {
             advice.append("Trời đang mưa, nhớ mang theo ô hoặc áo mưa nhé! ☔ ");
@@ -300,7 +280,6 @@ public class WeatherService {
             advice.append("Trời có tuyết, hãy mặc thật ấm! ❄️ ");
         }
 
-        // 2. Dựa trên nhiệt độ
         double temp = data.getTemperatureApi();
         if (temp < 15) {
             advice.append("Trời khá lạnh, nhớ mặc áo ấm và quàng khăn. 🧣 ");
@@ -310,8 +289,7 @@ public class WeatherService {
             advice.append("Nhiệt độ rất dễ chịu. ");
         }
 
-        // 3. Dựa trên ô nhiễm (Nếu có)
-        if (data.getCo() != null && data.getCo() > 1000) { // Ví dụ ngưỡng CO cao
+        if (data.getCo() != null && data.getCo() > 1000) {
             advice.append("Chất lượng không khí không tốt (CO cao), nên đeo khẩu trang khi ra đường. 😷 ");
         }
 
@@ -322,11 +300,7 @@ public class WeatherService {
         return advice.toString();
     }
 
-    /**
-     * Tính AQI từ PM2.5 theo công thức US EPA
-     */
     private int calculateAQI(double pm25) {
-        // US EPA: Truncate PM2.5 to 1 decimal place before lookup
         double c = Math.floor(pm25 * 10) / 10.0;
 
         double[][] breakpoints = {
@@ -347,8 +321,6 @@ public class WeatherService {
         return c > 500 ? 500 : 0;
     }
 
-    // --- 5. TÁC VỤ TỰ ĐỘNG CẬP NHẬT (NHIỆM VỤ 2) ---
-    // Chạy mỗi 30 phút (fixedRate = 1800000ms)
     @org.springframework.scheduling.annotation.Scheduled(fixedRate = 1800000)
     public void updateWeatherForAllLocations() {
         log.info("--- BẮT ĐẦU CẬP NHẬT THỜI TIẾT ĐỊNH KỲ ---");
@@ -364,12 +336,10 @@ public class WeatherService {
 
         for (Location location : locations) {
             try {
-                // Gọi lại hàm fetchWeatherFromApi có sẵn để lấy data mới và lưu vào DB
                 fetchWeatherFromApi(location);
                 successCount++;
                 log.debug("Đã cập nhật: {}", location.getCityName());
 
-                // Nghỉ 200ms giữa các request để tránh rate limit
                 Thread.sleep(200);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

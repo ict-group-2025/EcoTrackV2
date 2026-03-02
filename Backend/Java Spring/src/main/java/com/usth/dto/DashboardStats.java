@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class DashboardStats {
     private long totalUsers;
     private long totalMessages;
-    private String topLocation; // City ID or Name with most messages
+    private String topLocation;
     private long topLocationMsgCount;
 }

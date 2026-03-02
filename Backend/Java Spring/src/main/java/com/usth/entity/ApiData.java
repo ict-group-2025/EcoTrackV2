@@ -19,16 +19,14 @@ public class ApiData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // --- CÁC TRƯỜNG DỮ LIỆU THỜI TIẾT (OpenWeatherMap) ---
-
     @Column(name = "temperature_api", nullable = false)
     private Double temperatureApi;
 
     @Column(name = "humidity")
-    private Double humidity; // <--- ĐÃ THÊM (Nguyên nhân lỗi đỏ)
+    private Double humidity;
 
     @Column(name = "pressure")
-    private Double pressure; // <--- ĐÃ THÊM
+    private Double pressure;
 
     @Column(name = "wind_speed")
     private Double windSpeed;
@@ -44,8 +42,6 @@ public class ApiData {
 
     @Column(name = "uvi")
     private Float uvi;
-
-    // --- CÁC TRƯỜNG DỮ LIỆU Ô NHIỄM (Air Pollution API) ---
 
     @Column(name = "co")
     private Double co;
@@ -65,8 +61,6 @@ public class ApiData {
     @Column(name = "o3")
     private Double o3;
 
-    // --- THÔNG TIN CHUNG ---
-
     @Column(name = "recorded_at", nullable = false)
     private LocalDateTime recordedAt;
 
@@ -79,7 +73,6 @@ public class ApiData {
     @Column(name = "weather_icon", length = 10)
     private String weatherIcon;
 
-    // --- LIÊN KẾT ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id", nullable = false)
     private Location location;

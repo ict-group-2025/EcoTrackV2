@@ -23,7 +23,6 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    // 1 WebSocket: Nhận tin nhắn mới và bắn Realtime
     @MessageMapping("/chat/{locationId}/sendMessage")
     @SendTo("/topic/{locationId}")
     public ChatMessage sendMessage(@DestinationVariable String locationId, @Payload ChatMessage chatMessage) {
@@ -47,7 +46,6 @@ public class ChatController {
         return chatMessage;
     }
 
-    // 2 REST API: Lấy danh sách bình luận cũ (có pagination để tối ưu)
     @GetMapping("/api/chat/history/{locationId}")
     @ResponseBody
     public ResponseEntity<?> getChatHistory(
@@ -61,7 +59,6 @@ public class ChatController {
         }
     }
 
-    // 3 REST API: Gửi tin nhắn mới (thay thế WebSocket cho frontend)
     @org.springframework.web.bind.annotation.PostMapping("/api/chat/{locationId}/send")
     @ResponseBody
     public ResponseEntity<?> sendMessageRest(
@@ -79,7 +76,6 @@ public class ChatController {
         }
     }
 
-    // 4 REST API: Lấy danh sách tất cả phòng chat (locations)
     @GetMapping("/api/chat/locations")
     @ResponseBody
     public ResponseEntity<?> getAllChatLocations() {
@@ -90,7 +86,6 @@ public class ChatController {
         }
     }
 
-    // 5 REST API: User thu hồi tin nhắn của chính mình
     @org.springframework.web.bind.annotation.DeleteMapping("/api/chat/comments/{commentId}")
     @ResponseBody
     public ResponseEntity<?> recallMessage(

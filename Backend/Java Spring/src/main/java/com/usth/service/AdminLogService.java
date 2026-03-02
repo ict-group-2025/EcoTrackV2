@@ -12,18 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Service ghi log các hành động của Admin
- */
 @Service
 public class AdminLogService {
 
     @Autowired
     private AdminLogRepository adminLogRepository;
 
-    /**
-     * Ghi log hành động WARN
-     */
     public void logWarn(User admin, User targetUser) {
         AdminLog log = new AdminLog(admin.getId(), admin.getUsername(), "WARN");
         log.setTargetUserId(targetUser.getId());
@@ -33,9 +27,6 @@ public class AdminLogService {
         adminLogRepository.save(log);
     }
 
-    /**
-     * Ghi log hành động BAN
-     */
     public void logBan(User admin, User targetUser) {
         AdminLog log = new AdminLog(admin.getId(), admin.getUsername(), "BAN");
         log.setTargetUserId(targetUser.getId());
@@ -44,9 +35,6 @@ public class AdminLogService {
         adminLogRepository.save(log);
     }
 
-    /**
-     * Ghi log hành động UNBAN
-     */
     public void logUnban(User admin, User targetUser) {
         AdminLog log = new AdminLog(admin.getId(), admin.getUsername(), "UNBAN");
         log.setTargetUserId(targetUser.getId());
@@ -55,9 +43,6 @@ public class AdminLogService {
         adminLogRepository.save(log);
     }
 
-    /**
-     * Ghi log hành động DELETE_COMMENT
-     */
     public void logDeleteComment(User admin, Long messageId) {
         AdminLog log = new AdminLog(admin.getId(), admin.getUsername(), "DELETE_COMMENT");
         log.setTargetMessageId(messageId);
@@ -65,23 +50,14 @@ public class AdminLogService {
         adminLogRepository.save(log);
     }
 
-    /**
-     * Lấy 50 log gần đây nhất
-     */
     public List<AdminLog> getRecentLogs() {
         return adminLogRepository.findTop50ByOrderByCreatedAtDesc();
     }
 
-    /**
-     * Lấy log với paging
-     */
     public Page<AdminLog> getLogs(int page, int size) {
         return adminLogRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size));
     }
 
-    /**
-     * Thống kê số lượng theo action type
-     */
     public Map<String, Long> getStats() {
         Map<String, Long> stats = new HashMap<>();
         stats.put("warn", adminLogRepository.countByActionType("WARN"));

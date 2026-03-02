@@ -28,24 +28,22 @@ public class AuthController {
 
         @PostMapping("/login")
         public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-                System.out.println(">>> LOGIN ATTEMPT: " + loginRequest.getUsername()); // DEBUG LOG
 
-                // Check ban status before authenticate
                 var userOpt = userRepository.findByUsername(loginRequest.getUsername());
                 if (userOpt.isPresent()) {
                         User checkUser = userOpt.get();
-                        // Auto-unban if ban expired
+
                         if (checkUser.getBanExpiration() != null
                                         && checkUser.getBanExpiration().isBefore(java.time.LocalDateTime.now())) {
                                 checkUser.setBanExpiration(null);
                                 userRepository.save(checkUser);
                         }
-                        // Check permanent ban
+
                         if (checkUser.isBanned()) {
                                 return ResponseEntity.status(403)
                                                 .body(java.util.Map.of("error", "Tài khoản đã bị khóa vĩnh viễn."));
                         }
-                        // Check temp ban
+
                         if (checkUser.getBanExpiration() != null
                                         && checkUser.getBanExpiration().isAfter(java.time.LocalDateTime.now())) {
                                 return ResponseEntity.status(403)
@@ -88,19 +86,17 @@ public class AuthController {
                                         .body("Error: Username is already taken!");
                 }
 
-                // Create new user's account
                 User user = User.builder()
                                 .username(signUpRequest.getUsername())
                                 .fullName(signUpRequest.getFullName())
                                 .password(encoder.encode(signUpRequest.getPassword()))
-                                .userLocation(signUpRequest.getUserLocation()) // Lưu location
-                                .email(signUpRequest.getEmail()) // Set email from request
+                                .userLocation(signUpRequest.getUserLocation())
+                                .email(signUpRequest.getEmail())
                                 .role("USER")
                                 .build();
 
                 userRepository.save(user);
 
-                // Auto-login after registration: Generate JWT token
                 Authentication authentication = authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(signUpRequest.getUsername(),
                                                 signUpRequest.getPassword()));

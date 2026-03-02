@@ -20,12 +20,6 @@ import java.time.format.*;
 import java.util.*;
 import java.util.regex.*;
 
-/**
- * Service xử lý tin tức
- * - Fetch RSS từ VnExpress
- * - Lưu vào database
- * - Cung cấp API cho frontend
- */
 @Service
 public class NewsService {
 
@@ -34,53 +28,34 @@ public class NewsService {
     @Autowired
     private NewsRepository newsRepository;
 
-    // Danh sách RSS feeds
     private static final List<RssSource> RSS_SOURCES = Arrays.asList(
             new RssSource("Tuổi Trẻ Thời tiết", "weather", "https://tuoitre.vn/rss/thoi-tiet.rss"),
             new RssSource("VnExpress Sức khỏe", "health", "https://vnexpress.net/rss/suc-khoe.rss"),
             new RssSource("VnExpress Môi trường", "air", "https://vnexpress.net/rss/moi-truong.rss"));
 
-    /**
-     * Lấy tất cả tin, phân trang
-     */
     public Page<News> getAllNews(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return newsRepository.findAll(pageable);
     }
 
-    /**
-     * Lấy tin theo category
-     */
     public Page<News> getNewsByCategory(String category, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return newsRepository.findByCategoryOrderByPublishedAtDesc(category, pageable);
     }
 
-    /**
-     * Lấy tin mới nhất (top 20)
-     */
     public List<News> getLatestNews() {
         return newsRepository.findTop20ByOrderByPublishedAtDesc();
     }
 
-    /**
-     * Lấy chi tiết tin theo ID
-     */
     public Optional<News> getNewsById(Long id) {
         return newsRepository.findById(id);
     }
 
-    /**
-     * Tìm kiếm tin theo keyword
-     */
     public Page<News> searchNews(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return newsRepository.searchByKeyword(keyword, pageable);
     }
 
-    /**
-     * Thống kê số tin theo category
-     */
     public Map<String, Long> getNewsStats() {
         Map<String, Long> stats = new HashMap<>();
         stats.put("weather", newsRepository.countByCategory("weather"));
@@ -90,19 +65,13 @@ public class NewsService {
         return stats;
     }
 
-    /**
-     * Scheduled job: Fetch tin mới mỗi 5 phút
-     */
-    @Scheduled(fixedRate = 5 * 60 * 1000) // 5 phút
+    @Scheduled(fixedRate = 5 * 60 * 1000)
     public void scheduledIngest() {
         logger.info("⏰ [News Scheduler] Bắt đầu fetch tin tức...");
         int total = ingestAllSources();
         logger.info("✅ [News Scheduler] Hoàn tất: {} tin mới", total);
     }
 
-    /**
-     * Fetch tin từ tất cả RSS sources
-     */
     public int ingestAllSources() {
         int totalNew = 0;
         for (RssSource source : RSS_SOURCES) {
@@ -117,9 +86,6 @@ public class NewsService {
         return totalNew;
     }
 
-    /**
-     * Fetch tin từ 1 RSS source
-     */
     private int ingestFromRss(RssSource source) throws Exception {
         URL url = new URL(source.url);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -144,7 +110,6 @@ public class NewsService {
                     guid = getElementText(item, "link");
                 }
 
-                // Skip nếu đã tồn tại
                 if (newsRepository.existsByGuid(guid)) {
                     continue;
                 }
@@ -158,13 +123,11 @@ public class NewsService {
                 news.setSource(source.name);
                 news.setAuthor(getElementText(item, "author"));
 
-                // Parse published date
                 String pubDate = getElementText(item, "pubDate");
                 if (pubDate != null) {
                     news.setPublishedAt(parseRssDate(pubDate));
                 }
 
-                // Extract image từ description hoặc enclosure
                 String imageUrl = extractImageUrl(item);
                 if (imageUrl != null) {
                     news.setImageUrl(imageUrl);
@@ -177,8 +140,6 @@ public class NewsService {
 
         return newCount;
     }
-
-    // === Helper methods ===
 
     private String getElementText(Element parent, String tagName) {
         NodeList nodes = parent.getElementsByTagName(tagName);
@@ -194,9 +155,7 @@ public class NewsService {
     private String cleanHtml(String html) {
         if (html == null)
             return null;
-        // Remove HTML tags
         String text = html.replaceAll("<[^>]+>", "");
-        // Decode entities
         text = text.replace("&amp;", "&")
                 .replace("&lt;", "<")
                 .replace("&gt;", ">")
@@ -207,7 +166,6 @@ public class NewsService {
     }
 
     private String extractImageUrl(Element item) {
-        // Try enclosure first
         NodeList enclosures = item.getElementsByTagName("enclosure");
         if (enclosures.getLength() > 0) {
             Element enc = (Element) enclosures.item(0);
@@ -217,7 +175,6 @@ public class NewsService {
             }
         }
 
-        // Extract from description
         String desc = getElementText(item, "description");
         if (desc != null) {
             Pattern pattern = Pattern.compile("<img[^>]+src=[\"']([^\"']+)[\"']");
@@ -232,15 +189,12 @@ public class NewsService {
 
     private LocalDateTime parseRssDate(String dateStr) {
         try {
-            // Chuẩn hóa timezone: "GMT+7" → "+0700", "GMT+07" → "+0700"
             String normalized = dateStr.replaceAll("GMT\\+?(\\d)$", "+0$100")
                     .replaceAll("GMT\\+?(\\d{2})$", "+$100");
-            // RFC 822 format: "Sun, 26 Jan 2026 10:00:00 +0700"
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
             ZonedDateTime zdt = ZonedDateTime.parse(normalized, formatter);
             return zdt.toLocalDateTime();
         } catch (Exception e) {
-            // Fallback
             try {
                 return LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_DATE_TIME);
             } catch (Exception e2) {
@@ -249,7 +203,6 @@ public class NewsService {
         }
     }
 
-    // RSS Source class
     private static class RssSource {
         String name;
         String category;

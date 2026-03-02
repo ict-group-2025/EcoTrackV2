@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@EnableScheduling // <-- QUAN TRỌNG: Thêm dòng này để auto cập nhật thời tiết
+@EnableScheduling
 public class FinalApplication {
 
 	public static void main(String[] args) {

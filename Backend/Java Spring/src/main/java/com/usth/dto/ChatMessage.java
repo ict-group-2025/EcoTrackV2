@@ -10,11 +10,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatMessage {
-    private Long commentId; // ID thật trong database (cho thu hồi/xóa)
+    private Long commentId;
     private String sender;
     private Long userId;
     private String userLocation;
-    private Integer avatarId; // Avatar ID (1-10)
+    private Integer avatarId;
     private String content;
     private String type;
 }

@@ -15,7 +15,6 @@ public class WeatherController {
 
     private final WeatherService weatherService;
 
-    // API 1: Tìm kiếm (Tạo mới nếu chưa có)
     @GetMapping("/search")
     public ResponseEntity<?> searchCity(@RequestParam String city) {
         if (city == null || city.trim().isEmpty()) {
@@ -33,13 +32,11 @@ public class WeatherController {
         }
     }
 
-    // API 2: Lấy danh sách Forum (Các thành phố đã có)
     @GetMapping("/list")
     public ResponseEntity<?> getAllCities() {
         return ResponseEntity.ok(weatherService.getAllLocations());
     }
 
-    // API 3: Dự báo 5 ngày
     @GetMapping("/forecast/{city}")
     public ResponseEntity<?> getForecast(@PathVariable String city) {
         try {

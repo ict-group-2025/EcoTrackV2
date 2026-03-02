@@ -27,7 +27,6 @@ public class AdminController {
     private final CommentRepository commentRepository;
     private final AdminLogService adminLogService;
 
-    // Helper: Lấy admin hiện tại từ JWT
     private User getCurrentAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.getPrincipal() instanceof UserDetails) {
@@ -37,7 +36,6 @@ public class AdminController {
         return null;
     }
 
-    // 1. Xóa bình luận
     @DeleteMapping("/comments/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteComment(@PathVariable Long id) {
@@ -48,7 +46,6 @@ public class AdminController {
         User admin = getCurrentAdmin();
         commentRepository.deleteById(id);
 
-        // Log action
         if (admin != null) {
             adminLogService.logDeleteComment(admin, id);
         }
@@ -56,14 +53,13 @@ public class AdminController {
         return ResponseEntity.ok("Đã xóa bình luận thành công.");
     }
 
-    // 2. Cảnh báo user (Logic Ban tự động)
     @PostMapping("/users/{userId}/warn")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> warnUser(@PathVariable Long userId) {
         User admin = getCurrentAdmin();
 
         return userRepository.findById(userId).map(user -> {
-            // Không thể cảnh báo admin khác
+
             if ("ADMIN".equals(user.getRole())) {
                 return ResponseEntity.badRequest().body("Không thể cảnh báo Admin!");
             }
@@ -71,9 +67,8 @@ public class AdminController {
             user.setWarningCount(user.getWarningCount() + 1);
             String message = "Đã cảnh báo user. Số lần cảnh báo: " + user.getWarningCount();
 
-            // Logic Ban
             if (user.getWarningCount() >= 3) {
-                user.setWarningCount(0); // Reset cảnh báo
+                user.setWarningCount(0);
                 user.setBanCount(user.getBanCount() + 1);
 
                 if (user.getBanCount() == 1) {
@@ -91,7 +86,6 @@ public class AdminController {
 
             userRepository.save(user);
 
-            // Log action
             if (admin != null) {
                 adminLogService.logWarn(admin, user);
             }
@@ -100,7 +94,6 @@ public class AdminController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // 3. Ban User ngay lập tức
     @PostMapping("/users/{userId}/ban")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> banUser(@PathVariable Long userId) {
@@ -111,10 +104,9 @@ public class AdminController {
                 return ResponseEntity.badRequest().body("Không thể ban Admin!");
             }
             user.setBanned(true);
-            user.setBanExpiration(null); // Ban vĩnh viễn
+            user.setBanExpiration(null);
             userRepository.save(user);
 
-            // Log action
             if (admin != null) {
                 adminLogService.logBan(admin, user);
             }
@@ -123,7 +115,6 @@ public class AdminController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // 4. Unban User
     @PostMapping("/users/{userId}/unban")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> unbanUser(@PathVariable Long userId) {
@@ -132,10 +123,9 @@ public class AdminController {
         return userRepository.findById(userId).map(user -> {
             user.setBanned(false);
             user.setBanExpiration(null);
-            user.setWarningCount(0); // Reset cảnh báo
+            user.setWarningCount(0);
             userRepository.save(user);
 
-            // Log action
             if (admin != null) {
                 adminLogService.logUnban(admin, user);
             }
@@ -144,7 +134,6 @@ public class AdminController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // 5. Lấy danh sách Admin Logs
     @GetMapping("/logs")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> getAdminLogs() {
@@ -152,7 +141,6 @@ public class AdminController {
         return ResponseEntity.ok(logs);
     }
 
-    // 6. Thống kê Admin Logs
     @GetMapping("/logs/stats")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> getLogStats() {
@@ -160,12 +148,10 @@ public class AdminController {
         return ResponseEntity.ok(stats);
     }
 
-    // 7. Lấy danh sách Users
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> getAllUsers() {
         List<User> users = userRepository.findAll();
-        // Trả về thông tin cần thiết, loại bỏ sensitive data
         var result = users.stream().map(u -> Map.of(
                 "id", u.getId(),
                 "username", u.getUsername(),

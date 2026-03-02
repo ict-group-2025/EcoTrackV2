@@ -3,11 +3,6 @@ package com.usth.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * Entity lưu lịch sử hành động của Admin
- * - Warn, Ban, Unban users
- * - Delete comments
- */
 @Entity
 @Table(name = "admin_logs")
 public class AdminLog {
@@ -23,7 +18,7 @@ public class AdminLog {
     private String adminUsername;
 
     @Column(name = "action_type", nullable = false, length = 50)
-    private String actionType; // WARN, BAN, UNBAN, DELETE_COMMENT
+    private String actionType;
 
     @Column(name = "target_user_id")
     private Long targetUserId;
@@ -45,7 +40,6 @@ public class AdminLog {
         createdAt = LocalDateTime.now();
     }
 
-    // Constructors
     public AdminLog() {
     }
 
@@ -55,7 +49,6 @@ public class AdminLog {
         this.actionType = actionType;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

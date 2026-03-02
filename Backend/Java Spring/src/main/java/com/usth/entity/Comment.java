@@ -24,12 +24,10 @@ public class Comment {
 
     private LocalDateTime createdAt;
 
-    // Ai chat?
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Chat ở đâu? (Quan trọng: Nối với bảng Location của Sensor/API)
     @ManyToOne
     @JoinColumn(name = "location_id", nullable = false)
     private Location location;

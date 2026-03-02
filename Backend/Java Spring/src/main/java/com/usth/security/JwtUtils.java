@@ -18,7 +18,7 @@ public class JwtUtils {
     @Value("${app.jwtSecret:SecretKeyMustBeLongerThan32CharactersForHmacSha256}")
     private String jwtSecret;
 
-    @Value("${app.jwtExpirationMs:86400000}") // 1 ngày
+    @Value("${app.jwtExpirationMs:86400000}")
     private int jwtExpirationMs;
 
     private Key key() {

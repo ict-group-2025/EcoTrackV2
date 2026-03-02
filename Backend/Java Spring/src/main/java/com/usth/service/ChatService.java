@@ -41,7 +41,6 @@ public class ChatService {
         }
 
         try {
-            // 1. Giả lập User (Trong thực tế sẽ lấy từ Token đăng nhập)
             String username = chatMessage.getSender().trim();
             if (username.isEmpty()) {
                 throw new IllegalArgumentException("Username không được để trống");
@@ -57,16 +56,13 @@ public class ChatService {
                         return Objects.requireNonNull(userRepository.save(newUser), "Saved user cannot be null");
                     });
 
-            // 2. Tìm Location theo ID hoặc cityName
             Location location = resolveLocation(locationIdStr);
 
-            // 3. Validate và lưu Comment
             String content = chatMessage.getContent().trim();
             if (content.isEmpty()) {
                 throw new IllegalArgumentException("Nội dung comment không được để trống");
             }
 
-            // Giới hạn độ dài comment để tránh spam
             if (content.length() > 1000) {
                 content = content.substring(0, 1000);
                 log.warn("Comment quá dài, đã cắt bớt từ user: {}", username);
@@ -95,21 +91,14 @@ public class ChatService {
         }
     }
 
-    /**
-     * Resolve Location từ string: thử parse Long trước, nếu không thì tìm theo
-     * cityName
-     */
     private Location resolveLocation(String locationIdStr) {
-        // Thử parse Long trước
         try {
             Long locId = Long.parseLong(locationIdStr);
             return locationRepository.findById(locId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy Location ID: " + locId));
         } catch (NumberFormatException e) {
-            // locationIdStr là tên thành phố (e.g. "hanoi", "Hanoi")
             return locationRepository.findByCityNameIgnoreCase(locationIdStr)
                     .orElseGet(() -> {
-                        // Tạo Location mới cho phòng chat
                         Location newLoc = Location.builder()
                                 .cityName(locationIdStr)
                                 .latitude(0.0)
@@ -126,10 +115,9 @@ public class ChatService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Comment> commentPage = commentRepository.findByLocationIdWithUser(location.getId(), pageable);
 
-        // Chuyển đổi từ Entity Comment sang Model ChatMessage
         List<ChatMessage> history = commentPage.getContent().stream().map(comment -> {
             ChatMessage msg = new ChatMessage();
-            msg.setCommentId(comment.getId()); // ID thật trong database
+            msg.setCommentId(comment.getId());
             if (comment.getUser() != null) {
                 msg.setSender(comment.getUser().getUsername());
                 msg.setUserId(comment.getUser().getId());
@@ -144,7 +132,6 @@ public class ChatService {
             return msg;
         }).collect(Collectors.toList());
 
-        // Đóng gói response
         Map<String, Object> response = new HashMap<>();
         response.put("content", history);
         response.put("totalElements", commentPage.getTotalElements());
@@ -155,9 +142,6 @@ public class ChatService {
         return response;
     }
 
-    /**
-     * Lấy danh sách tất cả locations kèm số comment
-     */
     public List<Map<String, Object>> getAllLocationsWithStats() {
         List<Location> locations = locationRepository.findAll();
         return locations.stream().map(loc -> {
@@ -165,20 +149,15 @@ public class ChatService {
             item.put("id", loc.getId());
             item.put("cityName", loc.getCityName());
             item.put("countryCode", loc.getCountryCode());
-            // Đếm số comment cho location này
             long messageCount = commentRepository.findByLocationIdOrderByCreatedAtDesc(loc.getId()).size();
             item.put("messageCount", messageCount);
             return item;
         }).collect(Collectors.toList());
     }
 
-    /**
-     * User thu hồi tin nhắn của chính mình
-     */
     @Transactional
     public ResponseEntity<?> recallComment(Long commentId, String sender) {
         return commentRepository.findById(commentId).map(comment -> {
-            // Kiểm tra chủ sở hữu tin nhắn
             if (comment.getUser() == null || !comment.getUser().getUsername().equals(sender)) {
                 return ResponseEntity.badRequest().body("Bạn chỉ có thể thu hồi tin nhắn của chính mình!");
             }

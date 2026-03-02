@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "users") // "user" hay bị trùng từ khóa SQL
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +23,7 @@ public class User {
 
     @Column(nullable = false)
     private String fullName;
-    private String userLocation; // Thành phố nơi user sống
+    private String userLocation;
 
     private String email;
 
@@ -44,10 +44,9 @@ public class User {
     private boolean isBanned = false;
 
     @Builder.Default
-    private Integer avatarId = 1; // Avatar ID (1-10)
+    private Integer avatarId = 1;
 
-    // Một User có thể comment nhiều lần
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    @JsonIgnore // Tránh vòng lặp vô tận khi xuất JSON
+    @JsonIgnore
     private List<Comment> comments;
 }

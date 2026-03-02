@@ -9,14 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-/**
- * REST API cho News
- * - GET /api/news - Lấy danh sách tin
- * - GET /api/news/{id} - Chi tiết tin
- * - GET /api/news/search?q= - Tìm kiếm
- * - GET /api/news/stats - Thống kê
- * - POST /api/news/ingest - Trigger fetch thủ công
- */
 @RestController
 @RequestMapping("/api/news")
 @CrossOrigin(origins = { "http://localhost:5173", "http://127.0.0.1:5173" })
@@ -25,11 +17,6 @@ public class NewsController {
     @Autowired
     private NewsService newsService;
 
-    /**
-     * GET /api/news
-     * Lấy danh sách tin tức
-     * Query params: category, page, size
-     */
     @GetMapping
     public ResponseEntity<?> getNews(
             @RequestParam(required = false) String category,
@@ -59,10 +46,6 @@ public class NewsController {
         }
     }
 
-    /**
-     * GET /api/news/latest
-     * Lấy 20 tin mới nhất
-     */
     @GetMapping("/latest")
     public ResponseEntity<?> getLatestNews() {
         try {
@@ -74,10 +57,6 @@ public class NewsController {
         }
     }
 
-    /**
-     * GET /api/news/{id}
-     * Chi tiết 1 tin
-     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getNewsDetail(@PathVariable Long id) {
         try {
@@ -93,10 +72,6 @@ public class NewsController {
         }
     }
 
-    /**
-     * GET /api/news/search?q=keyword
-     * Tìm kiếm tin theo keyword
-     */
     @GetMapping("/search")
     public ResponseEntity<?> searchNews(
             @RequestParam String q,
@@ -125,10 +100,6 @@ public class NewsController {
         }
     }
 
-    /**
-     * GET /api/news/stats
-     * Thống kê số tin theo category
-     */
     @GetMapping("/stats")
     public ResponseEntity<?> getStats() {
         try {
@@ -140,10 +111,6 @@ public class NewsController {
         }
     }
 
-    /**
-     * POST /api/news/ingest
-     * Trigger fetch tin thủ công (Admin)
-     */
     @PostMapping("/ingest")
     public ResponseEntity<?> triggerIngest() {
         try {

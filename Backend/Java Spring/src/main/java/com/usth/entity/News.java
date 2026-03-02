@@ -3,10 +3,6 @@ package com.usth.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * Entity lưu tin tức từ RSS feeds
- * - Tin thời tiết, sức khỏe, môi trường
- */
 @Entity
 @Table(name = "news")
 public class News {
@@ -31,10 +27,10 @@ public class News {
     private String link;
 
     @Column(length = 50)
-    private String category; // weather, health, air
+    private String category;
 
     @Column(length = 100)
-    private String source; // VnExpress, etc
+    private String source;
 
     @Column(length = 200)
     private String author;
@@ -46,14 +42,13 @@ public class News {
     private LocalDateTime createdAt;
 
     @Column(name = "guid", unique = true, length = 500)
-    private String guid; // Unique ID từ RSS để tránh duplicate
+    private String guid;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
 
-    // Constructors
     public News() {
     }
 
@@ -65,7 +60,6 @@ public class News {
         this.source = source;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

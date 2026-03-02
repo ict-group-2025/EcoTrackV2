@@ -11,18 +11,18 @@ import java.time.LocalDateTime;
 @Table(name = "sensor", indexes = {
         @Index(name = "idx_sensor_time", columnList = "recorded_at")
 })
-@Data // Tự động sinh Getter, Setter, toString, equals, hashCode
-@NoArgsConstructor // Tạo Constructor rỗng
-@AllArgsConstructor // Tự sinh Constructor đầy đủ tham số
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Sensor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // BIGINT UNSIGNED -> Long
+    private Long id;
 
     @Column(name = "temperature_sensor", nullable = false)
-    private Double temperatureSensor; // DOUBLE NOT NULL
+    private Double temperatureSensor;
 
     @Column(name = "pressure")
     private Double pressure;
@@ -34,7 +34,7 @@ public class Sensor {
     private Double humidity;
 
     @Column(name = "aqi")
-    private Integer aqi; // INT UNSIGNED -> Integer
+    private Integer aqi;
 
     @Column(name = "tvoc")
     private Double tvoc;
@@ -46,5 +46,5 @@ public class Sensor {
     private Double dustDensity;
 
     @Column(name = "recorded_at", nullable = false)
-    private LocalDateTime recordedAt; // DATETIME -> LocalDateTime
+    private LocalDateTime recordedAt;
 }
