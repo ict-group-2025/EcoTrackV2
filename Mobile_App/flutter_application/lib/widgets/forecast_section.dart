@@ -14,7 +14,7 @@ class ForecastSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              '24-Hour Forecast',
+              '5 Days Forecast',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             TextButton(onPressed: () {}, child: const Text('See Detail ',style: TextStyle(color: Colors.blue),)),

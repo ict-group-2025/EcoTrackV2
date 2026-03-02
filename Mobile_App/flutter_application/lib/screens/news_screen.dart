@@ -194,7 +194,7 @@ class _NewsScreenState extends State<NewsScreen> with SingleTickerProviderStateM
       case 'health':
         return 'Health';
       case 'air':
-        return 'Air Quality';
+        return 'Life';
       default:
         return category;
     }

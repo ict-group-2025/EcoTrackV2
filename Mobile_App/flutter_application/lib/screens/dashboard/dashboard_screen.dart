@@ -5,8 +5,12 @@ import 'package:flutter_application/views/air_quality_view_model.dart';
 import 'package:flutter_application/views/forecast_view_model.dart';
 import 'package:flutter_application/views/location_view_model.dart';
 import 'package:flutter_application/views/weather_view_model.dart';
+import 'package:flutter_application/views/ai_forecast_view_model.dart';
 import 'package:flutter_application/widgets/box_skeleton.dart';
 import 'package:flutter_application/models/data_models.dart';
+import 'package:flutter_application/widgets/health_advice_card.dart';
+import 'package:flutter_application/widgets/temperature_trend_card.dart';
+import 'package:flutter_application/widgets/temperature_trend_card_skeleton.dart';
 // import 'package:flutter_application/widgets/forecast_section_v2.dart';
 import 'package:provider/provider.dart';
 // import '../../services/app_state.dart';
@@ -51,12 +55,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 24),
                 // WeatherCard(weather: appState.getWeatherData()),
                 _buildWeather(),
+                Consumer<LocationViewModel>(
+                  builder: (context, locationVM, _) {
+                    // Hide AI forecast when using manual location selection
+                    if (locationVM.isManualLocation) {
+                      return const SizedBox.shrink();
+                    }
+                    return _buildAIForecastViewModel();
+                  },
+                ),
                 const SizedBox(height: 16),
                 _buildAQICard(),
                 const SizedBox(height: 16),
                 _buildWeatherDetail(),
                 const SizedBox(height: 16),
-                // HealthAdviceCard(aqi: appState.getAQIData()),
+                _buildHealthAdviceCard(),
                 const SizedBox(height: 24),
                 _buildForecastSection(),
                 // _buildForecastSectionV2(),
@@ -194,6 +207,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _buildHealthAdviceCard() {
+    return Consumer2<AirQualityViewModel, WeatherViewModel>(
+      builder: (_, aqiVM, weatherVM, __) {
+        // Show loading state if either is loading
+        if (aqiVM.isLoading || weatherVM.isLoading || 
+            aqiVM.currentItem == null || weatherVM.weather == null) {
+          return const BoxSkeleton(height: 120);
+        }
+
+        // Create AQI data
+        final aqi = aqiVM.currentAQI ?? 0;
+        final quality = aqiVM.getQualityLevel();
+        final description = aqiVM.getQualityDescription();
+
+        final aqiData = AQIData(
+          aqi: aqi,
+          quality: quality,
+          description: description,
+        );
+
+        // Get weather data and convert to WeatherData
+        final weatherModel = weatherVM.weather!;
+        
+        // Convert WeatherModel to WeatherData for HealthAdviceCard
+        final weather = WeatherData(
+          temperature: weatherModel.temp,
+          condition: weatherModel.condition,
+          highTemp: weatherModel.highTemp,
+          lowTemp: weatherModel.lowTemp,
+          humidity: weatherModel.humidity,
+          windSpeed: weatherModel.windSpeed.toInt(),
+          uvIndex: "N/A", // Not available in WeatherModel
+        );
+
+        return HealthAdviceCard(
+          aqi: aqiData,
+          weather: weather,
+        );
+      },
+    );
+  }
+
   Widget _buildForecastSection() {
     return Consumer<ForecastViewModel>(
       builder: (_, vm, __) {
@@ -217,6 +272,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
 
         return ForecastSection(forecasts: vm.forecasts);
+      },
+    );
+  }
+
+  Widget _buildAIForecastViewModel() {
+    return Consumer<AIForecastViewModel>(
+      builder: (_, vm, __) {
+        if (vm.isLoading) {
+          return const TemperatureTrendCardSkeleton();
+        }
+        return Column(
+          children: [
+            const SizedBox(height: 16),
+            TemperatureTrendCard(
+              data: vm.temperaturePoints,
+              isLoading: vm.isLoading,
+              error: vm.error,
+            ),
+          ],
+        );
       },
     );
   }
